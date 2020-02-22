@@ -23,6 +23,11 @@ enum win_mode {
 	                  |MODE_MOUSEMANY,
 };
 
+void xloadfonts(char *, double);
+void xloadsparefonts(void);
+void xunloadfonts(void);
+void xhints(void);
+void cresize(int, int);
 void xbell(void);
 void xclipcopy(void);
 void xdrawcursor(int, int, Glyph, int, int, Glyph);

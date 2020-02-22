@@ -1936,6 +1936,15 @@ strhandle(void)
 				}
 			}
 			return;
+               case 69:
+                       if (narg < 2)
+                               break;
+                       xunloadfonts();
+                       xloadfonts(strescseq.args[1], 0);
+                       xloadsparefonts();
+                       cresize(0, 0);
+                       xhints();
+                       return;
 		case 4: /* color set */
 			if (narg < 3)
 				break;

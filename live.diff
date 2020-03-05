@@ -1,0 +1,75 @@
+diff --git a/st.c b/st.c
+index 3e48410..a100514 100644
+--- a/st.c
++++ b/st.c
+@@ -156,7 +156,6 @@ typedef struct {
+ static void execsh(char *, char **);
+ static void stty(char **);
+ static void sigchld(int);
+-static void ttywriteraw(const char *, size_t);
+ 
+ static void csidump(void);
+ static void csihandle(void);
+diff --git a/st.h b/st.h
+index a1928ca..3f8c4f1 100644
+--- a/st.h
++++ b/st.h
+@@ -94,6 +94,7 @@ void ttyhangup(void);
+ int ttynew(char *, char *, char *, char **);
+ size_t ttyread(void);
+ void ttyresize(int, int);
++void ttywriteraw(const char *, size_t);
+ void ttywrite(const char *, size_t, int);
+ 
+ void resettitle(void);
+diff --git a/x.c b/x.c
+index 86ee9e6..06cd2e3 100644
+--- a/x.c
++++ b/x.c
+@@ -193,6 +193,8 @@ static void mousesel(XEvent *, int);
+ static void mousereport(XEvent *);
+ static char *kmap(KeySym, uint);
+ static int match(uint, uint);
++static void config_init(void);
++static void reload(int sig);
+ 
+ static void run(void);
+ static void usage(void);
+@@ -1971,6 +1973,19 @@ resource_load(XrmDatabase db, char *name, enum resource_type rtype, void *dst)
+ 	return 0;
+ }
+ 
++void
++reload(int sig)
++{
++	config_init();
++	xunloadfonts();
++	usedfont = opt_font ? opt_font : font;
++	xloadfonts(usedfont, 0);
++	xloadcols();
++	cresize(win.w, win.h);
++	ttywriteraw("\033[O", 3);
++	signal(SIGUSR1, reload);
++}
++
+ void
+ config_init(void)
+ {
+@@ -1979,7 +1994,7 @@ config_init(void)
+ 	ResourcePref *p;
+ 
+ 	XrmInitialize();
+-	resm = XResourceManagerString(xw.dpy);
++	resm = XResourceManagerString(XOpenDisplay(NULL));
+ 	if (!resm)
+ 		return;
+ 
+@@ -2068,6 +2083,7 @@ run:
+ 	config_init();
+ 	cols = MAX(cols, 1);
+ 	rows = MAX(rows, 1);
++	signal(SIGUSR1, reload);
+ 	tnew(cols, rows);
+ 	xinit(cols, rows);
+ 	xsetenv();
+

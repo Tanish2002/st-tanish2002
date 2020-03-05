@@ -1292,6 +1292,9 @@ tsetchar(Rune u, Glyph *attr, int x, int y)
 	term.dirty[y] = 1;
 	term.line[y][x] = *attr;
 	term.line[y][x].u = u;
+
+	if (isboxdraw(u))
+		term.line[y][x].mode |= ATTR_BOXDRAW;
 }
 
 void
@@ -1936,15 +1939,6 @@ strhandle(void)
 				}
 			}
 			return;
-               case 69:
-                       if (narg < 2)
-                               break;
-                       xunloadfonts();
-                       xloadfonts(strescseq.args[1], 0);
-                       xloadsparefonts();
-                       cresize(0, 0);
-                       xhints();
-                       return;
 		case 4: /* color set */
 			if (narg < 3)
 				break;

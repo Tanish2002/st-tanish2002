@@ -1,5 +1,6 @@
 # Changes
 
++ **added live-reload patch** to reload colors and font on the fly, need to do (`$ sudo pkill -USR1 st`) Credit:[viz](https://github.com/vizs)
 + **added boxdraw patch** to make lines gapless
 + **Shift-Mouse Wheel** now scrolls 5 lines at a time
 + **changed cursor's color and shape** to make it stand out more

@@ -1,0 +1,68 @@
+From de7ab87871fdd861b1f0a83899dca6402212c7b4 Mon Sep 17 00:00:00 2001
+From: PaxPlay <pax@paxplay.me>
+Date: Sun, 30 Dec 2018 13:40:58 +0100
+Subject: [PATCH] Implement color reloading on XClientMessageEvent
+
+---
+ x.c | 12 +++++++++---
+ 1 file changed, 9 insertions(+), 3 deletions(-)
+
+diff --git a/x.c b/x.c
+index 759a622..344d25e 100644
+--- a/x.c
++++ b/x.c
+@@ -195,6 +195,8 @@ static int match(uint, uint);
+ static void run(void);
+ static void usage(void);
+ 
++static void config_init(void);
++
+ static void (*handler[LASTEvent])(XEvent *) = {
+ 	[KeyPress] = kpress,
+ 	[ClientMessage] = cmessage,
+@@ -1811,7 +1813,6 @@ kpress(XEvent *ev)
+ 	ttywrite(buf, len, 1);
+ }
+ 
+-
+ void
+ cmessage(XEvent *e)
+ {
+@@ -1829,6 +1830,10 @@ cmessage(XEvent *e)
+ 	} else if (e->xclient.data.l[0] == xw.wmdeletewin) {
+ 		ttyhangup();
+ 		exit(0);
++	} else if (strcmp(XGetAtomName(xw.dpy, e->xclient.message_type), "ReloadColors") == 0) {
++		config_init();
++		xloadcols();
++		cresize(win.w, win.h);
+ 	}
+ }
+ 
+@@ -1862,6 +1867,7 @@ run(void)
+ 		 */
+ 		if (XFilterEvent(&ev, None))
+ 			continue;
++
+ 		if (ev.type == ConfigureNotify) {
+ 			w = ev.xconfigure.width;
+ 			h = ev.xconfigure.height;
+@@ -1940,7 +1946,7 @@ run(void)
+ 								lastblink)));
+ 					}
+ 					drawtimeout.tv_sec = \
+-					    drawtimeout.tv_nsec / 1E9;
++						drawtimeout.tv_nsec / 1E9;
+ 					drawtimeout.tv_nsec %= (long)1E9;
+ 				} else {
+ 					tv = NULL;
+@@ -1994,7 +2000,7 @@ config_init(void)
+ 	ResourcePref *p;
+ 
+ 	XrmInitialize();
+-	resm = XResourceManagerString(xw.dpy);
++	resm = XResourceManagerString(XOpenDisplay(NULL)); // the RESOURCE_MANAGER property isn't updated
+ 	if (!resm)
+ 		return;
+ 
+

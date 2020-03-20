@@ -194,11 +194,11 @@ static void mousesel(XEvent *, int);
 static void mousereport(XEvent *);
 static char *kmap(KeySym, uint);
 static int match(uint, uint);
-static void config_init(void);
-static void reload(int sig);
 
 static void run(void);
 static void usage(void);
+
+static void config_init(void);
 
 static void (*handler[LASTEvent])(XEvent *) = {
 	[KeyPress] = kpress,
@@ -1942,6 +1942,10 @@ cmessage(XEvent *e)
 	} else if (e->xclient.data.l[0] == xw.wmdeletewin) {
 		ttyhangup();
 		exit(0);
+	} else if (strcmp(XGetAtomName(xw.dpy, e->xclient.message_type), "ReloadColors") == 0) {
+		config_init();
+		xloadcols();
+		cresize(win.w, win.h);
 	}
 }
 
@@ -1975,6 +1979,7 @@ run(void)
 		 */
 		if (XFilterEvent(&ev, None))
 			continue;
+
 		if (ev.type == ConfigureNotify) {
 			w = ev.xconfigure.width;
 			h = ev.xconfigure.height;
@@ -2053,7 +2058,7 @@ run(void)
 								lastblink)));
 					}
 					drawtimeout.tv_sec = \
-					    drawtimeout.tv_nsec / 1E9;
+						drawtimeout.tv_nsec / 1E9;
 					drawtimeout.tv_nsec %= (long)1E9;
 				} else {
 					tv = NULL;
@@ -2100,19 +2105,6 @@ resource_load(XrmDatabase db, char *name, enum resource_type rtype, void *dst)
 }
 
 void
-reload(int sig)
-{
-	config_init();
-	xunloadfonts();
-	usedfont = opt_font ? opt_font : font;
-	xloadfonts(usedfont, 0);
-	xloadcols();
-	cresize(win.w, win.h);
-	ttywriteraw("\033[O", 3);
-	signal(SIGUSR1, reload);
-}
-
-void
 config_init(void)
 {
 	char *resm;
@@ -2120,7 +2112,7 @@ config_init(void)
 	ResourcePref *p;
 
 	XrmInitialize();
-	resm = XResourceManagerString(XOpenDisplay(NULL));
+	resm = XResourceManagerString(XOpenDisplay(NULL)); // the RESOURCE_MANAGER property isn't updated
 	if (!resm)
 		return;
 
@@ -2212,7 +2204,6 @@ run:
 	config_init();
 	cols = MAX(cols, 1);
 	rows = MAX(rows, 1);
-	signal(SIGUSR1, reload);
 	tnew(cols, rows);
 	xinit(cols, rows);
 	xsetenv();

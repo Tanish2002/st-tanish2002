@@ -168,7 +168,6 @@ typedef struct {
 static void execsh(char *, char **);
 static void stty(char **);
 static void sigchld(int);
-static void ttywriteraw(const char *, size_t);
 
 static void csidump(void);
 static void csihandle(void);

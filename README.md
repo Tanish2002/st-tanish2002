@@ -4,6 +4,7 @@
 + **added boxdraw patch** to make lines gapless
 + **Shift-Mouse Wheel** now scrolls 5 lines at a time
 + **changed cursor's color and shape** to make it stand out more
++ **added color16 and color17 support** because someone asked for it
 
 
 ## Installation 

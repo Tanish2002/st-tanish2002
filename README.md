@@ -1,6 +1,6 @@
 # Changes
 
-+ **added live-reload patch** to reload colors and font on the fly, need to do (`$ sudo pkill -USR1 st`) Credit:[viz](https://github.com/vizs)
++ **added live-reload patch** to reload colors and font on the fly, need to do (`$ sudo stmessage st`) Credit:[PaxPlay](https://github.com/PaxPlay/st/commit/de7ab87871fdd861b1f0a83899dca6402212c7b4)
 + **added boxdraw patch** to make lines gapless
 + **Shift-Mouse Wheel** now scrolls 5 lines at a time
 + **changed cursor's color and shape** to make it stand out more
@@ -14,7 +14,7 @@ cd st
 sudo make install
 ```
 
-
-**For more information, check out [Luke Smith's Repo](https://github.com/LukeSmithxyz/st)** (my fork is based on his).
-
+##More Info
+**Check out [Luke Smith's Repo](https://github.com/LukeSmithxyz/st)** (my fork is based on his).
+** For live Reloading you need stmessage, you can find it in [bin](https://gitlab.com/Tanish2002/dot-files/-/blob/master/bin/bin/stmessage) folder or [make it yourself](https://gitlab.com/Tanish2002/stmessage-tanish2002)** (I recommend building it yourself)
 Enjoy!

@@ -9,14 +9,14 @@
 ## Installation 
 
 ```
-git clone https://gitlab.com/Tanish2002/st-tanish2002.git
-cd st
-sudo make install
+$ git clone https://gitlab.com/Tanish2002/st-tanish2002.git
+$ cd st
+$ sudo make install
 ```
 
 ## More Info
 + **Check out [Luke Smith's Repo](https://github.com/LukeSmithxyz/st)** (my fork is based on his).
-+ **For live Reloading you need stmessage, you can find it in [bin](https://gitlab.com/Tanish2002/dot-files/-/blob/master/bin/bin/stmessage) folder or [make it yourself](https://gitlab.com/Tanish2002/stmessage-tanish2002)** (I recommend building it yourself)
++ **For live Reloading you need stmessage, you can find it in [bin](https://gitlab.com/Tanish2002/dot-files/-/blob/master/bin/bin/stmessage) folder or [build it yourself](https://gitlab.com/Tanish2002/stmessage-tanish2002)** (I recommend building it yourself)
 
 
 Enjoy!

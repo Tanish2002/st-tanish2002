@@ -749,13 +749,13 @@ xloadcolor(int i, const char *name, Color *ncolor)
 	XRenderColor color = { .alpha = 0xffff };
 
 	if (!name) {
-		if (BETWEEN(i, 16, 255)) { /* 256 color */
-			if (i < 6*6*6+16) { /* same colors as xterm */
-				color.red   = sixd_to_16bit( ((i-16)/36)%6 );
-				color.green = sixd_to_16bit( ((i-16)/6) %6 );
-				color.blue  = sixd_to_16bit( ((i-16)/1) %6 );
+		if (BETWEEN(i, 18, 255)) { /* 256 color */
+			if (i < 6*6*6+18) { /* same colors as xterm */
+				color.red   = sixd_to_16bit( ((i-18)/36)%6 );
+				color.green = sixd_to_16bit( ((i-18)/6) %6 );
+				color.blue  = sixd_to_16bit( ((i-18)/1) %6 );
 			} else { /* greyscale */
-				color.red = 0x0808 + 0x0a0a * (i - (6*6*6+16));
+				color.red = 0x0808 + 0x0a0a * (i - (6*6*6+18));
 				color.green = color.blue = color.red;
 			}
 			return XftColorAllocValue(xw.dpy, xw.vis,
@@ -1944,6 +1944,9 @@ cmessage(XEvent *e)
 		exit(0);
 	} else if (strcmp(XGetAtomName(xw.dpy, e->xclient.message_type), "ReloadColors") == 0) {
 		config_init();
+		xunloadfonts();
+		usedfont = (opt_font == NULL)? font : opt_font;
+		xloadfonts(usedfont, 0);
 		xloadcols();
 		cresize(win.w, win.h);
 	}

@@ -5,7 +5,7 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "FuraCode Nerd Font Mono:pixelsize=15:antialias=true:autohint=true";
+static char *font = "FuraCode Nerd Font Mono:pixelsize=15:style:Bold:antialias=true:autohint=true";
 /* Spare fonts */
 static char *font2[] = { "JoyPixels:pixelsize=10:antialias=true:autohint=true" };
 
@@ -103,24 +103,24 @@ float alpha = 0.95;
 /* Terminal colors (16 first used in escape sequence) */
 static const char *colorname[] = {
 	/* 8 normal colors */
-	"#282828", /* hard contrast: #1d2021 / soft contrast: #32302f */
-	"#cc241d",
-	"#98971a",
-	"#d79921",
-	"#458588",
-	"#b16286",
-	"#689d6a",
-	"#a89984",
+	"#30343d", /* hard contrast: #1d2021 / soft contrast: #32302f */
+	"#e75e87",
+	"#83d1a2",
+	"#dc8b73",
+	"#639ce8",
+	"#b972e9",
+	"#62b3e4",
+	"#b4c1ce",
 
 	/* 8 bright colors */
-	"#928374",
-	"#fb4934",
-	"#b8bb26",
-	"#fabd2f",
-	"#83a598",
-	"#d3869b",
-	"#8ec07c",
-	"#ebdbb2",
+	"#535b69",
+	"#e5a9bb",
+	"#b6dac4",
+	"#e9c5bb",
+	"#a1c1eb",
+	"#d3a6f1",
+	"#acd1e8",
+	"#c5c8c6",
 
 	"#4ec2e8",
 	"#e9967e",
@@ -131,9 +131,9 @@ static const char *colorname[] = {
 
 
 	/* more colors can be added after 255 to use with DefaultXX */
-	"#282828",   /* 256 -> bg */
-	"#ebdbb2",   /* 257 -> fg */
-	"#add8e6", /* 258 -> cursor */
+	"#0f0f13",   /* 256 -> bg */
+	"#9ca18b",   /* 257 -> fg */
+	"#9ca18b", /* 258 -> cursor */
 
 };
 

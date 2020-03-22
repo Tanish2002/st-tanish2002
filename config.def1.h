@@ -5,7 +5,7 @@
  *
  * font: see http://freedesktop.org/software/fontconfig/fontconfig-user.html
  */
-static char *font = "FuraCode Nerd Font Mono:pixelsize=15:style:Bold:antialias=true:autohint=true";
+static char *font = "FuraCode Nerd Font Mono:pixelsize=15:antialias=true:autohint=true";
 /* Spare fonts */
 static char *font2[] = { "JoyPixels:pixelsize=10:antialias=true:autohint=true" };
 
@@ -57,7 +57,7 @@ static unsigned int blinktimeout = 800;
 /*
  * thickness of underline and bar cursors
  */
-static unsigned int cursorthickness = 1;
+static unsigned int cursorthickness = 2;
 
 /*
  * 1: render most of the lines/blocks characters without using the font for
@@ -98,32 +98,32 @@ char *termname = "st-256color";
 unsigned int tabspaces = 8;
 
 /* bg opacity */
-float alpha = 1;
+float alpha = 0.95;
 
 /* Terminal colors (16 first used in escape sequence) */
 static const char *colorname[] = {
 	/* 8 normal colors */
-	"#30343d", /* hard contrast: #1d2021 / soft contrast: #32302f */
-	"#e75e87",
-	"#83d1a2",
-	"#dc8b73",
-	"#639ce8",
-	"#b972e9",
-	"#62b3e4",
-	"#b4c1ce",
+	"#282828", /* hard contrast: #1d2021 / soft contrast: #32302f */
+	"#cc241d",
+	"#98971a",
+	"#d79921",
+	"#458588",
+	"#b16286",
+	"#689d6a",
+	"#a89984",
 
 	/* 8 bright colors */
-	"#535b69",
-	"#e5a9bb",
-	"#b6dac4",
-	"#e9c5bb",
-	"#a1c1eb",
-	"#d3a6f1",
-	"#acd1e8",
-	"#c5c8c6",
+	"#928374",
+	"#fb4934",
+	"#b8bb26",
+	"#fabd2f",
+	"#83a598",
+	"#d3869b",
+	"#8ec07c",
+	"#ebdbb2",
 
-	"#0f0f13",
-	"#9ca18b",
+	"#4ec2e8",
+	"#e9967e",
 
 
 
@@ -131,9 +131,9 @@ static const char *colorname[] = {
 
 
 	/* more colors can be added after 255 to use with DefaultXX */
-	"#0f0f13",   /* 256 -> bg */
-	"#9ca18b",   /* 257 -> fg */
-	"#9ca18b", /* 258 -> cursor */
+	"#282828",   /* 256 -> bg */
+	"#ebdbb2",   /* 257 -> fg */
+	"#add8e6", /* 258 -> cursor */
 
 };
 
@@ -144,8 +144,8 @@ static const char *colorname[] = {
  */
 unsigned int defaultfg = 257;
 unsigned int defaultbg = 256;
-static unsigned int defaultcs = 258;
-static unsigned int defaultrcs = 258;
+static unsigned int defaultcs = 257;
+static unsigned int defaultrcs = 257;
 
 /*
  * Default shape of cursor

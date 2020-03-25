@@ -19,6 +19,6 @@ $ sudo make install
 + **For live Reloading you need stmessage, you can find it in [bin](https://gitlab.com/Tanish2002/dot-files/-/blob/master/bin/bin/stmessage) folder or [build it yourself](https://gitlab.com/Tanish2002/stmessage-tanish2002)** (I recommend building it yourself)
 + **All the applied patches are available in [patches Folder](patches)** if anyone wants to remove a patch they can find the patch there...
 + **For emoji support use this [patch](https://gitlab.freedesktop.org/xorg/lib/libxft/merge_requests/1.patch) on LibXft and recompile it** Credit: Maxime Coste
-
++
 
 Enjoy!

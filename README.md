@@ -5,7 +5,7 @@
 + **Removed Shift-Mouse Wheel** now just scroll wheel scrolls 5 lines at a time
 + **changed cursor's color and shape** to make it stand out more
 + **added color16 and color17 support** because someone asked for it
-
++ **added Ligatures patch** for ligtures support
 
 ## Installation 
 

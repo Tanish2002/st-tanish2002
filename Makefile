@@ -4,7 +4,7 @@
 
 include config.mk
 
-SRC = st.c x.c boxdraw.c
+SRC = st.c x.c hb.c boxdraw.c
 OBJ = $(SRC:.c=.o)
 
 all: options st
@@ -12,7 +12,7 @@ all: options st
 options:
 	@echo st build options:
 	@echo "CFLAGS  = $(STCFLAGS)"
-	@echo "LDFLAGS = $(STLDFLAGS)"
+	@echo "LDFLAGS = $(STLDF LAGS)"
 	@echo "CC      = $(CC)"
 
 config.h:
@@ -22,7 +22,8 @@ config.h:
 	$(CC) $(STCFLAGS) -c $<
 
 st.o: config.h st.h win.h
-x.o: arg.h config.h st.h win.h
+x.o: arg.h config.h st.h win.h hb.h
+hb.o: st.h
 boxdraw.o: config.h st.h boxdraw_data.h
 
 $(OBJ): config.h config.mk

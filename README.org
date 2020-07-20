@@ -29,7 +29,7 @@
   - Source: [[https://gitlab.com/Tanish2002/stmessage-tanish2002][Here]]
 + For emoji support use this [[https://gitlab.freedesktop.org/xorg/lib/libxft/merge_requests/1.patch][patch]] on LibXft and recompile it Credit: Maxime Coste
 ** Changes
-+ *added live-reload patch* to reload colors and font on the fly, need to do ~$ sudo stmessage st~ Credit:[[https://github.com/PaxPlay/st/commit/de7ab87871fdd861b1f0a83899dca6402212c7b4][PaxPlay]]
++ *added live-reload patch* to reload colors and font on the fly, need to do =$ stmessage st= Credit:[[https://github.com/PaxPlay/st/commit/de7ab87871fdd861b1f0a83899dca6402212c7b4][PaxPlay]]
 + *added boxdraw patch* to make lines gapless
 + *Removed Shift-Mouse Wheel* now just scroll wheel scrolls 5 lines at a time
 + *changed cursor's color and shape* to make it stand out more

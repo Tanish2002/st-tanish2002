@@ -1,47 +1,186 @@
+#+TITLE: St Build
+#+PROPERTY: header-args :tangle config.h
+#+STARTUP: showeverything
+* Table of Contents :toc:
+- [[#about-this-build][About this Build]]
+  - [[#changes][Changes]]
+  - [[#installation][Installation]]
+  - [[#more-info][More Info]]
+- [[#configdefh][Config.def.h]]
+  - [[#terminal-font][Terminal Font]]
+  - [[#border-pixels][Border Pixels]]
+  - [[#default-shell][Default Shell]]
+  - [[#misc-stuff][Misc Stuff]]
+  - [[#fps][FPS]]
+  - [[#cursor-settings][Cursor Settings]]
+  - [[#boxdraw-settins][Boxdraw Settins]]
+  - [[#term-name][Term Name]]
+  - [[#tab-spaces][Tab Spaces]]
+  - [[#opacity][Opacity]]
+  - [[#colors][Colors]]
+  - [[#xresources-settings][Xresources Settings]]
+  - [[#default-stuff-i-havent-modified][Default Stuff I haven't modified]]
+
+* About this Build
++ This is my personal build of suckless st
++ The patches are preapplied and can be found in the [[https://gitlab.com/Tanish2002/st-tanish2002/-/tree/master/patches][patches folder]]
++ For Live Reload support you need stmessage
+  - Binary: [[https://gitlab.com/Tanish2002/dot-files/-/blob/master/bin/bin/stmessage][Here]]
+  - Source: [[https://gitlab.com/Tanish2002/stmessage-tanish2002][Here]]
++ For emoji support use this [[https://gitlab.freedesktop.org/xorg/lib/libxft/merge_requests/1.patch][patch]] on LibXft and recompile it Credit: Maxime Coste
+** Changes
++ *added live-reload patch* to reload colors and font on the fly, need to do (`$ sudo stmessage st`) Credit:[[https://github.com/PaxPlay/st/commit/de7ab87871fdd861b1f0a83899dca6402212c7b4][PaxPlay]]
++ *added boxdraw patch* to make lines gapless
++ *Removed Shift-Mouse Wheel* now just scroll wheel scrolls 5 lines at a time
++ *changed cursor's color and shape* to make it stand out more
++ *added color16 and color17 support* because someone asked for it
++ *added Ligatures patch* for ligtures support
+
+** Installation
+#+BEGIN_EXAMPLE
+$ git clone https://gitlab.com/Tanish2002/st-tanish2002.git
+$ cd st
+$ sudo make install
+#+END_EXAMPLE
+
+** More Info
++ For live Reloading you need stmessage, you can find it in [[https://gitlab.com/Tanish2002/dot-files/-/blob/master/bin/bin/stmessage][bin]] folder or [[https://gitlab.com/Tanish2002/stmessage-tanish2002][build it yourself]] (I recommend building it yourself)
++ All the applied patches are available in patches Folder if anyone wants to remove a patch they can find the patch there...
++ For emoji support use this patch on LibXft and recompile it Credit: Maxime Coste
+* Config.def.h
+** Terminal Font
+Main Font
+#+BEGIN_SRC c
 static char *font = "FuraCode Nerd Font Mono:pixelsize=15:style:Bold:antialias=true:autohint=true";
+#+END_SRC
 
+Spare/Secondary Font
+#+BEGIN_SRC c
 static char *font2[] = { "JoyPixels:pixelsize=10:antialias=true:autohint=true" };
-
+#+END_SRC
+** Border Pixels
+#+BEGIN_SRC c
 static int borderpx = 45;
-
+#+END_SRC
+** Default Shell
+What Shell is execed by st depends of these precedence rules:
+1. program passed with -e
+2. utmp option
+3. SHELL environment variable
+4. value of shell in /etc/passwd
+5. value of shell in config.h
+#+BEGIN_SRC c
 static char *shell = "/bin/sh";
 char *utmp = NULL;
 char *stty_args = "stty raw pass8 nl -echo -iexten -cstopb 38400";
+#+END_SRC
+** Misc Stuff
 
+identification sequence returned in DA and DECID
+#+BEGIN_SRC c
 char *vtiden = "\033[?6c";
+#+END_SRC
 
+Kerning / character bounding-box multipliers
+#+BEGIN_SRC c
 static float cwscale = 1.0;
 static float chscale = 1.0;
+#+END_SRC
 
+word delimiter string
+More advanced example: L" `'\"()[]{}"
+#+BEGIN_SRC c
 wchar_t *worddelimiters = L" ";
+#+END_SRC
 
+selection timeouts (in milliseconds)
+#+BEGIN_SRC c
 static unsigned int doubleclicktimeout = 300;
 static unsigned int tripleclicktimeout = 600;
+#+END_SRC
 
+alt screens
+#+BEGIN_SRC c
 int allowaltscreen = 1;
+#+END_SRC
 
+bell volume. It must be a value between -100 and 100. Use 0 for disabling
+it
+#+BEGIN_SRC c
 static int bellvolume = 0;
-
+#+END_SRC
+** FPS
+Frames Per Second st should at maximum draw to the screen
+#+BEGIN_SRC c
 static unsigned int xfps = 120;
 static unsigned int actionfps = 30;
-
+#+END_SRC
+** Cursor Settings :toc:
+blinking timeout (set to 0 to disable blinking) for the terminal blinking
+attribute.
+#+BEGIN_SRC c
 static unsigned int blinktimeout = 800;
+#+END_SRC
 
+Thickness of underline and bar cursors
+#+BEGIN_SRC c
 static unsigned int cursorthickness = 1;
+#+END_SRC
 
+Default shape of cursor
++ 2: Block ("█")
++ 4: Underline ("_")
++ 6: Bar ("|")
++ 7: Snowman ("☃")
+#+BEGIN_SRC c
 static unsigned int cursorshape = 6;
-
+#+END_SRC
+** Boxdraw Settins
++ 1: render most of the lines/blocks characters without using the font for
+   perfect alignment between cells (U2500 - U259F except dashes/diagonals).
+   Bold affects lines thickness if boxdraw_bold is not 0. Italic is ignored.
++ 0: disable (render all U25XX glyphs normally from the font).
+#+BEGIN_SRC c
 const int boxdraw = 1;
 const int boxdraw_bold = 1;
+#+END_SRC
 
+braille (U28XX)
++ 1: render as adjacent "pixels"
++ 0: use font
+#+BEGIN_SRC c
 const int boxdraw_braille = 0;
-
+#+END_SRC
+** Term Name
+Default Terminal name
+#+BEGIN_SRC c
 char *termname = "st-256color";
+#+END_SRC
+** Tab Spaces
+spaces per tab
 
+When you are changing this value, don't forget to adapt the »it« value in
+the st.info and appropriately install the st.info in the environment where
+you use this st version.
+
+it#$tabspaces,
+
+Secondly make sure your kernel is not expanding tabs. When running `stty
+-a` »tab0« should appear. You can tell the terminal to not expand tabs by
+ running following command:
+
+stty tabs
+#+BEGIN_SRC c
 unsigned int tabspaces = 8;
-
+#+END_SRC
+** Opacity
+Background Opacity
+#+BEGIN_SRC c
 float alpha = 1;
-
+#+END_SRC
+** Colors
+Terminal colors (16 first used in escape sequence)
+#+BEGIN_SRC c
 static const char *colorname[] = {
 	/* 8 normal colors */
 	"#30343d", /* hard contrast: #1d2021 / soft contrast: #32302f */
@@ -77,12 +216,20 @@ static const char *colorname[] = {
 	"#9ca18b", /* 258 -> cursor */
 
 };
+#+END_SRC
 
+Default colors (colorname index)
+foreground, background, cursor, reverse cursor
+#+BEGIN_SRC c
 unsigned int defaultfg = 257;
 unsigned int defaultbg = 256;
 static unsigned int defaultcs = 258;
 static unsigned int defaultrcs = 258;
+#+END_SRC
 
+** Xresources Settings
+Xresources preferences to load at startup
+#+BEGIN_SRC c
 ResourcePref resources[] = {
 		{ "font",         STRING,  &font },
 		{ "font2",        STRING,  &font2 },
@@ -119,18 +266,37 @@ ResourcePref resources[] = {
 		{ "chscale",      FLOAT,   &chscale },
 		{ "alpha",        FLOAT,   &alpha },
 };
-
+#+END_SRC
+** Default Stuff I haven't modified
+Default columns and rows numbers
+#+BEGIN_SRC c
 static unsigned int cols = 80;
 static unsigned int rows = 24;
+#+END_SRC
 
+Default colour and shape of the mouse cursor
+#+BEGIN_SRC c
 static unsigned int mouseshape = XC_xterm;
 static unsigned int mousefg = 7;
 static unsigned int mousebg = 0;
+#+END_SRC
 
+Color used to display font attributes when fontconfig selected a font which
+doesn't match the ones requested.
+#+BEGIN_SRC c
 static unsigned int defaultattr = 11;
+#+END_SRC
 
+Force mouse select/shortcuts while mask is active (when MODE_MOUSE is set).
+Note that if you want to use ShiftMask with selmasks, set this to an other
+modifier, set to 0 to not use it.
+#+BEGIN_SRC c
 static uint forcemousemod = ShiftMask;
+#+END_SRC
 
+Internal mouse shortcuts.
+Beware that overloading Button1 will disable the selection.
+#+BEGIN_SRC c
 static MouseShortcut mshortcuts[] = {
 	/* mask                 button   function        argument       release */
 	{ XK_NO_MOD,            Button4, kscrollup,      {.i = 5} },
@@ -139,6 +305,10 @@ static MouseShortcut mshortcuts[] = {
 	{ XK_ANY_MOD,           Button4, ttysend,        {.s = "\031"} },
 	{ XK_ANY_MOD,           Button5, ttysend,        {.s = "\005"} },
 };
+#+END_SRC
+
+Internal keyboard shortcuts
+#+BEGIN_SRC c
 
 #define MODKEY Mod1Mask
 #define TERMMOD (ControlMask|ShiftMask)
@@ -160,11 +330,44 @@ static Shortcut shortcuts[] = {
 	{ ShiftMask,            XK_Page_Up,     kscrollup,      {.i = -1} },
 	{ ShiftMask,            XK_Page_Down,   kscrolldown,    {.i = -1} },
 };
+#+END_SRC
 
+Special keys (change & recompile st.info accordingly)
+
+Mask value:
+Use XK_ANY_MOD to match the key no matter modifiers state
+Use XK_NO_MOD to match the key alone (no modifiers)
+appkey value:
+ 0: no value
+ > 0: keypad application mode enabled
+   = 2: term.numlock = 1
+ < 0: keypad application mode disabled
+appcursor value:
+ 0: no value
+ > 0: cursor application mode enabled
+ < 0: cursor application mode disabled
+
+Be careful with the order of the definitions because st searches in
+this table sequentially, so any XK_ANY_MOD must be in the last
+position for a key.
+
+
+
+If you want keys other than the X11 function keys (0xFD00 - 0xFFFF)
+to be mapped below, add them to this array.
+#+BEGIN_SRC c
 static KeySym mappedkeys[] = { -1 };
+#+END_SRC
 
+State bits to ignore when matching key or button events.  By default,
+numlock (Mod2Mask) and keyboard layout (XK_SWITCH_MOD) are ignored.
+#+BEGIN_SRC c
 static uint ignoremod = Mod2Mask|XK_SWITCH_MOD;
+#+END_SRC
 
+This is the huge key array which defines all compatibility to the Linux
+world. Please decide about changes wisely.
+#+BEGIN_SRC c
 static Key key[] = {
 	/* keysym           mask            string      appkey appcursor */
 	{ XK_KP_Home,       ShiftMask,      "\033[2J",       0,   -1},
@@ -377,12 +580,24 @@ static Key key[] = {
 	{ XK_F34,           XK_NO_MOD,      "\033[21;5~",    0,    0},
 	{ XK_F35,           XK_NO_MOD,      "\033[23;5~",    0,    0},
 };
+#+END_SRC
 
+Selection types' masks.
+Use the same masks as usual.
+Button1Mask is always unset, to make masks match between ButtonPress.
+ButtonRelease and MotionNotify.
+If no match is found, regular selection is used.
+#+BEGIN_SRC c
 static uint selmasks[] = {
 	[SEL_RECTANGULAR] = Mod1Mask,
 };
+#+END_SRC
 
+Printable characters in ASCII, used to estimate the advance width
+of single wide characters.
+#+BEGIN_SRC c
 static char ascii_printable[] =
 	" !\"#$%&'()*+,-./0123456789:;<=>?"
 	"@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_"
 	"`abcdefghijklmnopqrstuvwxyz{|}~";
+#+END_SRC

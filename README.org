@@ -13,7 +13,7 @@
   - [[#misc-stuff][Misc Stuff]]
   - [[#fps][FPS]]
   - [[#cursor-settings][Cursor Settings]]
-  - [[#boxdraw-settins][Boxdraw Settins]]
+  - [[#boxdraw-settins][Boxdraw Settings]]
   - [[#term-name][Term Name]]
   - [[#tab-spaces][Tab Spaces]]
   - [[#opacity][Opacity]]
@@ -135,7 +135,7 @@ Default shape of cursor
 #+BEGIN_SRC c
 static unsigned int cursorshape = 6;
 #+END_SRC
-** Boxdraw Settins
+** Boxdraw Settings
 + 1: render most of the lines/blocks characters without using the font for
    perfect alignment between cells (U2500 - U259F except dashes/diagonals).
    Bold affects lines thickness if boxdraw_bold is not 0. Italic is ignored.

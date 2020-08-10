@@ -13,7 +13,7 @@
   - [[#misc-stuff][Misc Stuff]]
   - [[#fps][FPS]]
   - [[#cursor-settings][Cursor Settings]]
-  - [[#boxdraw-settins][Boxdraw Settings]]
+  - [[#boxdraw-settings][Boxdraw Settings]]
   - [[#term-name][Term Name]]
   - [[#tab-spaces][Tab Spaces]]
   - [[#opacity][Opacity]]

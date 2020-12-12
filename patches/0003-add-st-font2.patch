@@ -1,11 +1,7 @@
-From ba724004c6a368e452114f7dc147a9978fe0f3b4 Mon Sep 17 00:00:00 2001
-From: Kirill Bugaev <kirill.bugaev87@gmail.com>
-Date: Tue, 16 Apr 2019 04:31:30 +0800
-Subject: [PATCH] This patch allows to add spare font besides default. Some
- glyphs can be not present in default font. For this glyphs st uses
- font-config and try to find them in font cache first. This patch append fonts
- defined in font2 variable to the beginning of font cache. So they will be
- used first for glyphs that absent in default font.
+From eb8703050a9bcf0079b813bd49dc6fd43c5a4563 Mon Sep 17 00:00:00 2001
+From: Tanish2002 <tanishkhare@gmail.com>
+Date: Sun, 13 Dec 2020 01:05:17 +0530
+Subject: [PATCH 3/9] add st-font2
 
 ---
  config.def.h |   6 +++
@@ -13,7 +9,7 @@ Subject: [PATCH] This patch allows to add spare font besides default. Some
  2 files changed, 107 insertions(+)
 
 diff --git a/config.def.h b/config.def.h
-index 482901e..676719e 100644
+index bdedae5..509f55a 100644
 --- a/config.def.h
 +++ b/config.def.h
 @@ -6,6 +6,12 @@
@@ -30,10 +26,10 @@ index 482901e..676719e 100644
  
  /*
 diff --git a/x.c b/x.c
-index 5828a3b..d37e59d 100644
+index b28b23f..d49b72b 100644
 --- a/x.c
 +++ b/x.c
-@@ -149,6 +149,8 @@ static void xhints(void);
+@@ -158,6 +158,8 @@ static void xhints(void);
  static int xloadcolor(int, const char *, Color *);
  static int xloadfont(Font *, FcPattern *);
  static void xloadfonts(char *, double);
@@ -42,7 +38,7 @@ index 5828a3b..d37e59d 100644
  static void xunloadfont(Font *);
  static void xunloadfonts(void);
  static void xsetenv(void);
-@@ -296,6 +298,7 @@ zoomabs(const Arg *arg)
+@@ -308,6 +310,7 @@ zoomabs(const Arg *arg)
  {
  	xunloadfonts();
  	xloadfonts(usedfont, arg->f);
@@ -50,7 +46,7 @@ index 5828a3b..d37e59d 100644
  	cresize(0, 0);
  	redraw();
  	xhints();
-@@ -977,6 +980,101 @@ xloadfonts(char *fontstr, double fontsize)
+@@ -1028,6 +1031,101 @@ xloadfonts(char *fontstr, double fontsize)
  	FcPatternDestroy(pattern);
  }
  
@@ -152,7 +148,7 @@ index 5828a3b..d37e59d 100644
  void
  xunloadfont(Font *f)
  {
-@@ -1057,6 +1155,9 @@ xinit(int cols, int rows)
+@@ -1137,6 +1235,9 @@ xinit(int cols, int rows)
  	usedfont = (opt_font == NULL)? font : opt_font;
  	xloadfonts(usedfont, 0);
  
@@ -160,8 +156,8 @@ index 5828a3b..d37e59d 100644
 +	xloadsparefonts();
 +
  	/* colors */
- 	xw.cmap = XDefaultColormap(xw.dpy, xw.scr);
+ 	xw.cmap = XCreateColormap(xw.dpy, parent, xw.vis, None);
  	xloadcols();
 -- 
-2.21.0
+2.29.2
 

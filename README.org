@@ -15,7 +15,9 @@
 + *added scrollback patch* because I don't wanna use a seprate program for scrolling
 + *added vertcenter patch*
 + *added xresource patch* becauseI don't like to compile again always  
-+ *added Ligatures patch* because ligtures good
++ *added Ligatures patch* because ligtures good  
++ *added anysize patch* because there a was a offset at bottom
++ *added w3m patch* to preview images in ranger
 + *Removed Shift-Mouse Wheel* now just scroll wheel scrolls 5 lines at a time
 + *changed cursor's color and shape* to make it stand out more
 

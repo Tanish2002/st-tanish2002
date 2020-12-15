@@ -1,17 +1,17 @@
-From a3222820334686c3fc70382eb0c5badf8c3377c2 Mon Sep 17 00:00:00 2001
+From be8d445ffc8f5989c558cb26b449b6bda765899e Mon Sep 17 00:00:00 2001
 From: Tanish2002 <tanishkhare@gmail.com>
-Date: Sun, 13 Dec 2020 16:35:24 +0530
-Subject: [PATCH 2/3] add w3m support
+Date: Tue, 15 Dec 2020 15:11:48 +0530
+Subject: [PATCH 11/11] st-w3m
 
 ---
  x.c | 2 ++
  1 file changed, 2 insertions(+)
 
 diff --git a/x.c b/x.c
-index dd9e628..20b1177 100644
+index 619961e..3855f13 100644
 --- a/x.c
 +++ b/x.c
-@@ -1768,6 +1768,8 @@ xsettitle(char *p)
+@@ -1827,6 +1827,8 @@ xsixelscrollup(SixelContext *ctx, int n, int top)
  int
  xstartdraw(void)
  {

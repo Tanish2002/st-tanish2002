@@ -1,17 +1,17 @@
-From d4f2eb011a78d85c16cedbd8b17c97e747655559 Mon Sep 17 00:00:00 2001
+From 93108babb7b0877c8523920ad02b4cd0dc3026aa Mon Sep 17 00:00:00 2001
 From: Tanish2002 <tanishkhare@gmail.com>
-Date: Sun, 13 Dec 2020 01:19:36 +0530
-Subject: [PATCH 7/9] add stmessage
+Date: Tue, 15 Dec 2020 15:09:12 +0530
+Subject: [PATCH 08/11] add stmessage
 
 ---
  x.c | 9 ++++++++-
  1 file changed, 8 insertions(+), 1 deletion(-)
 
 diff --git a/x.c b/x.c
-index 5c06e8e..66d8f95 100644
+index 14073d3..93444f8 100644
 --- a/x.c
 +++ b/x.c
-@@ -207,6 +207,8 @@ static int match(uint, uint);
+@@ -197,6 +197,8 @@ static int match(uint, uint);
  static void run(void);
  static void usage(void);
  
@@ -20,7 +20,7 @@ index 5c06e8e..66d8f95 100644
  static void (*handler[LASTEvent])(XEvent *) = {
  	[KeyPress] = kpress,
  	[ClientMessage] = cmessage,
-@@ -2006,6 +2008,10 @@ cmessage(XEvent *e)
+@@ -2158,6 +2160,10 @@ cmessage(XEvent *e)
  	} else if (e->xclient.data.l[0] == xw.wmdeletewin) {
  		ttyhangup();
  		exit(0);
@@ -31,7 +31,7 @@ index 5c06e8e..66d8f95 100644
  	}
  }
  
-@@ -2038,6 +2044,7 @@ run(void)
+@@ -2190,6 +2196,7 @@ run(void)
  		 */
  		if (XFilterEvent(&ev, None))
  			continue;
@@ -39,7 +39,7 @@ index 5c06e8e..66d8f95 100644
  		if (ev.type == ConfigureNotify) {
  			w = ev.xconfigure.width;
  			h = ev.xconfigure.height;
-@@ -2165,7 +2172,7 @@ config_init(void)
+@@ -2317,7 +2324,7 @@ config_init(void)
  	ResourcePref *p;
  
  	XrmInitialize();

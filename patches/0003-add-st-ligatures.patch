@@ -1,47 +1,46 @@
-From 2e21a76d05992f5379f4459326e886002437a16d Mon Sep 17 00:00:00 2001
+From bccbc2c2881b48d751e5f6a538c89912513cce08 Mon Sep 17 00:00:00 2001
 From: Tanish2002 <tanishkhare@gmail.com>
-Date: Sun, 13 Dec 2020 01:19:54 +0530
-Subject: [PATCH 8/9] add st-ligatures
+Date: Tue, 15 Dec 2020 15:04:48 +0530
+Subject: [PATCH 03/11] add st-ligatures
 
 ---
  Makefile  |   5 +-
  config.mk |   6 ++-
- hb.c      | 136 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ hb.c      | 141 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
  hb.h      |   7 +++
  st.c      |   3 +-
  st.h      |   4 +-
  win.h     |   2 +-
  x.c       |  16 +++++--
- 8 files changed, 169 insertions(+), 10 deletions(-)
+ 8 files changed, 174 insertions(+), 10 deletions(-)
  create mode 100644 hb.c
  create mode 100644 hb.h
 
 diff --git a/Makefile b/Makefile
-index 6dfa212..adfa07a 100644
+index 18831ce..0e86575 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -4,7 +4,7 @@
  
  include config.mk
  
--SRC = st.c x.c boxdraw.c
-+SRC = st.c x.c boxdraw.c hb.c
+-SRC = st.c x.c sixel.c sixel_hls.c boxdraw.c
++SRC = st.c x.c sixel.c sixel_hls.c boxdraw.c hb.c
  OBJ = $(SRC:.c=.o)
  
  all: options st
-@@ -22,8 +22,9 @@ config.h:
+@@ -22,7 +22,8 @@ config.h:
  	$(CC) $(STCFLAGS) -c $<
  
  st.o: config.h st.h win.h
 -x.o: arg.h config.h st.h win.h
 +x.o: arg.h config.h st.h win.h hb.h
- boxdraw.o: config.h st.h boxdraw_data.h
 +hb.o: st.h
+ boxdraw.o: config.h st.h boxdraw_data.h
  
  $(OBJ): config.h config.mk
- 
 diff --git a/config.mk b/config.mk
-index aaa54ff..1741840 100644
+index c070a4a..3d236f0 100644
 --- a/config.mk
 +++ b/config.mk
 @@ -15,10 +15,12 @@ PKG_CONFIG = pkg-config
@@ -51,7 +50,7 @@ index aaa54ff..1741840 100644
 -       `$(PKG_CONFIG) --cflags freetype2`
 +       `$(PKG_CONFIG) --cflags freetype2` \
 +       `$(PKG_CONFIG) --cflags harfbuzz`
- LIBS = -L$(X11LIB) -lm -lrt -lX11 -lutil -lXft -lXrender\
+ LIBS = -L$(X11LIB) -lm -lrt -lX11 -lutil -lXft \
         `$(PKG_CONFIG) --libs fontconfig` \
 -       `$(PKG_CONFIG) --libs freetype2`
 +       `$(PKG_CONFIG) --libs freetype2` \
@@ -61,10 +60,10 @@ index aaa54ff..1741840 100644
  STCPPFLAGS = -DVERSION=\"$(VERSION)\" -D_XOPEN_SOURCE=600
 diff --git a/hb.c b/hb.c
 new file mode 100644
-index 0000000..7df2828
+index 0000000..ebc36cb
 --- /dev/null
 +++ b/hb.c
-@@ -0,0 +1,136 @@
+@@ -0,0 +1,141 @@
 +#include <stdlib.h>
 +#include <stdio.h>
 +#include <math.h>
@@ -72,6 +71,7 @@ index 0000000..7df2828
 +#include <hb.h>
 +#include <hb-ft.h>
 +
++#include "sixel.h"
 +#include "st.h"
 +
 +void hbtransformsegment(XftFont *xfont, const Glyph *string, hb_codepoint_t *codepoints, int start, int length);
@@ -155,6 +155,10 @@ index 0000000..7df2828
 +	for (int i = 0, specidx = 0; i < len; i++) {
 +		if (glyphs[i].mode & ATTR_WDUMMY)
 +			continue;
++		if (glyphs[i].mode & ATTR_BOXDRAW) {
++			specidx++;
++			continue;
++		}
 +
 +		if (codepoints[i] != specs[specidx].glyph)
 +			((Glyph *)glyphs)[i].mode |= ATTR_LIGA;
@@ -215,21 +219,21 @@ index 0000000..b3e02d0
 +void hbtransform(XftGlyphFontSpec *, const Glyph *, size_t, int, int);
 +
 diff --git a/st.c b/st.c
-index 6edffb3..b242063 100644
+index d1250d7..cefbbae 100644
 --- a/st.c
 +++ b/st.c
-@@ -2663,7 +2663,8 @@ draw(void)
+@@ -2660,7 +2660,8 @@ draw(void)
  	drawregion(0, 0, term.col, term.row);
- 	if (term.scr == 0)
- 		xdrawcursor(cx, term.c.y, term.line[term.c.y][cx],
--				term.ocx, term.ocy, term.line[term.ocy][term.ocx]);
-+				term.ocx, term.ocy, term.line[term.ocy][term.ocx],
-+				term.line[term.ocy], term.col);
+   xdrawsixel(&term.sixel, term.line, term.row, term.col);
+ 	xdrawcursor(cx, term.c.y, term.line[term.c.y][cx],
+-			term.ocx, term.ocy, term.line[term.ocy][term.ocx]);
++			term.ocx, term.ocy, term.line[term.ocy][term.ocx],
++			term.line[term.ocy], term.col);
  	term.ocx = cx;
  	term.ocy = term.c.y;
  	xfinishdraw();
 diff --git a/st.h b/st.h
-index 1ecf257..0e14aea 100644
+index 57aae3f..58b4585 100644
 --- a/st.h
 +++ b/st.h
 @@ -11,7 +11,8 @@
@@ -242,40 +246,40 @@ index 1ecf257..0e14aea 100644
  				(a).bg != (b).bg)
  #define TIMEDIFF(t1, t2)	((t1.tv_sec-t2.tv_sec)*1000 + \
  				(t1.tv_nsec-t2.tv_nsec)/1E6)
-@@ -34,6 +35,7 @@ enum glyph_attribute {
- 	ATTR_WIDE       = 1 << 9,
+@@ -35,6 +36,7 @@ enum glyph_attribute {
  	ATTR_WDUMMY     = 1 << 10,
- 	ATTR_BOXDRAW    = 1 << 11,
-+	ATTR_LIGA       = 1 << 12,
+ 	ATTR_SIXEL      = 1 << 11,
+   ATTR_BOXDRAW    = 1 << 12,
++  ATTR_LIGA       = 1 << 13,
  	ATTR_BOLD_FAINT = ATTR_BOLD | ATTR_FAINT,
  };
  
 diff --git a/win.h b/win.h
-index e6e4369..8b5b618 100644
+index 3183024..9ee6a7e 100644
 --- a/win.h
 +++ b/win.h
-@@ -25,7 +25,7 @@ enum win_mode {
- 
- void xbell(void);
- void xclipcopy(void);
+@@ -52,7 +52,7 @@ void xsixelscrollup(SixelContext *, int, int);
+ void xsixelnewimage(SixelContext *, int, int);
+ int xsixelparse(SixelContext *, unsigned char *, int);
+ void xsixeldeleteimage(SixelContext *, ImageList *);
 -void xdrawcursor(int, int, Glyph, int, int, Glyph);
 +void xdrawcursor(int, int, Glyph, int, int, Glyph, Line, int);
+ void xdrawsixel(SixelContext *, Line *, int, int);
  void xdrawline(Line, int, int, int);
  void xfinishdraw(void);
- void xloadcols(void);
 diff --git a/x.c b/x.c
-index 66d8f95..7657f37 100644
+index 3d9692e..0161579 100644
 --- a/x.c
 +++ b/x.c
 @@ -20,6 +20,7 @@ char *argv0;
- #include "arg.h"
+ #include "sixel.h"
  #include "st.h"
  #include "win.h"
 +#include "hb.h"
  
  /* types used in config.h */
  typedef struct {
-@@ -1156,6 +1157,9 @@ xunloadfont(Font *f)
+@@ -1028,6 +1029,9 @@ xunloadfont(Font *f)
  void
  xunloadfonts(void)
  {
@@ -285,7 +289,7 @@ index 66d8f95..7657f37 100644
  	/* Free the loaded fonts in the font cache.  */
  	while (frclen > 0)
  		XftFontClose(xw.dpy, frc[--frclen].font);
-@@ -1366,7 +1370,7 @@ xmakeglyphfontspecs(XftGlyphFontSpec *specs, const Glyph *glyphs, int len, int x
+@@ -1229,7 +1233,7 @@ xmakeglyphfontspecs(XftGlyphFontSpec *specs, const Glyph *glyphs, int len, int x
  		mode = glyphs[i].mode;
  
  		/* Skip dummy wide-character spacing. */
@@ -294,7 +298,7 @@ index 66d8f95..7657f37 100644
  			continue;
  
  		/* Determine font for glyph if different from previous glyph. */
-@@ -1478,6 +1482,9 @@ xmakeglyphfontspecs(XftGlyphFontSpec *specs, const Glyph *glyphs, int len, int x
+@@ -1341,6 +1345,9 @@ xmakeglyphfontspecs(XftGlyphFontSpec *specs, const Glyph *glyphs, int len, int x
  		numspecs++;
  	}
  
@@ -304,7 +308,7 @@ index 66d8f95..7657f37 100644
  	return numspecs;
  }
  
-@@ -1631,14 +1638,17 @@ xdrawglyph(Glyph g, int x, int y)
+@@ -1494,14 +1501,17 @@ xdrawglyph(Glyph g, int x, int y)
  }
  
  void

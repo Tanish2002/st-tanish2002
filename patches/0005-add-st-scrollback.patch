@@ -1,19 +1,19 @@
-From ae353c2cb16cbaa26793d46b3060e4f143698d3f Mon Sep 17 00:00:00 2001
+From ffdb6a4d6d6ad43aeb75980122e4c4becc35cbdb Mon Sep 17 00:00:00 2001
 From: Tanish2002 <tanishkhare@gmail.com>
-Date: Sun, 13 Dec 2020 01:15:16 +0530
-Subject: [PATCH 4/9] add st-scrollback
+Date: Tue, 15 Dec 2020 15:08:11 +0530
+Subject: [PATCH 05/11] add st-scrollback
 
 ---
  config.def.h |   4 ++
- st.c         | 125 ++++++++++++++++++++++++++++++++++++++++-----------
+ st.c         | 138 ++++++++++++++++++++++++++++++++++++++++-----------
  st.h         |   2 +
- 3 files changed, 104 insertions(+), 27 deletions(-)
+ 3 files changed, 115 insertions(+), 29 deletions(-)
 
 diff --git a/config.def.h b/config.def.h
-index 509f55a..20f4d8f 100644
+index 87fa43c..04aae8e 100644
 --- a/config.def.h
 +++ b/config.def.h
-@@ -196,6 +196,8 @@ static uint forcemousemod = ShiftMask;
+@@ -192,6 +192,8 @@ static uint forcemousemod = ShiftMask;
   */
  static MouseShortcut mshortcuts[] = {
  	/* mask                 button   function        argument       release */
@@ -22,7 +22,7 @@ index 509f55a..20f4d8f 100644
  	{ XK_ANY_MOD,           Button2, selpaste,       {.i = 0},      1 },
  	{ ShiftMask,            Button4, ttysend,        {.s = "\033[5;2~"} },
  	{ XK_ANY_MOD,           Button4, ttysend,        {.s = "\031"} },
-@@ -221,6 +223,8 @@ static Shortcut shortcuts[] = {
+@@ -217,6 +219,8 @@ static Shortcut shortcuts[] = {
  	{ TERMMOD,              XK_Y,           selpaste,       {.i =  0} },
  	{ ShiftMask,            XK_Insert,      selpaste,       {.i =  0} },
  	{ TERMMOD,              XK_Num_Lock,    numlock,        {.i =  0} },
@@ -32,10 +32,10 @@ index 509f55a..20f4d8f 100644
  
  /*
 diff --git a/st.c b/st.c
-index 3c78b0a..6edffb3 100644
+index cefbbae..002b501 100644
 --- a/st.c
 +++ b/st.c
-@@ -35,6 +35,7 @@
+@@ -36,6 +36,7 @@
  #define ESC_ARG_SIZ   16
  #define STR_BUF_SIZ   ESC_BUF_SIZ
  #define STR_ARG_SIZ   ESC_ARG_SIZ
@@ -43,7 +43,7 @@ index 3c78b0a..6edffb3 100644
  
  /* macros */
  #define IS_SET(flag)		((term.mode & (flag)) != 0)
-@@ -42,6 +43,9 @@
+@@ -43,6 +44,9 @@
  #define ISCONTROLC1(c)		(BETWEEN(c, 0x80, 0x9f))
  #define ISCONTROL(c)		(ISCONTROLC0(c) || ISCONTROLC1(c))
  #define ISDELIM(u)		(u && wcschr(worddelimiters, u))
@@ -53,7 +53,7 @@ index 3c78b0a..6edffb3 100644
  
  enum term_mode {
  	MODE_WRAP        = 1 << 0,
-@@ -115,6 +119,9 @@ typedef struct {
+@@ -118,6 +122,9 @@ typedef struct {
  	int col;      /* nb col */
  	Line *line;   /* screen */
  	Line *alt;    /* alternate screen */
@@ -63,7 +63,7 @@ index 3c78b0a..6edffb3 100644
  	int *dirty;   /* dirtyness of lines */
  	TCursor c;    /* cursor */
  	int ocx;      /* old cursor col */
-@@ -184,8 +191,8 @@ static void tnewline(int);
+@@ -189,8 +196,8 @@ static void tnewline(int);
  static void tputtab(int);
  static void tputc(Rune);
  static void treset(void);
@@ -74,7 +74,7 @@ index 3c78b0a..6edffb3 100644
  static void tsetattr(int *, int);
  static void tsetchar(Rune, Glyph *, int, int);
  static void tsetdirt(int, int);
-@@ -414,10 +421,10 @@ tlinelen(int y)
+@@ -419,10 +426,10 @@ tlinelen(int y)
  {
  	int i = term.col;
  
@@ -87,7 +87,7 @@ index 3c78b0a..6edffb3 100644
  		--i;
  
  	return i;
-@@ -526,7 +533,7 @@ selsnap(int *x, int *y, int direction)
+@@ -531,7 +538,7 @@ selsnap(int *x, int *y, int direction)
  		 * Snap around if the word wraps around at the end or
  		 * beginning of a line.
  		 */
@@ -96,7 +96,7 @@ index 3c78b0a..6edffb3 100644
  		prevdelim = ISDELIM(prevgp->u);
  		for (;;) {
  			newx = *x + direction;
-@@ -541,14 +548,14 @@ selsnap(int *x, int *y, int direction)
+@@ -546,14 +553,14 @@ selsnap(int *x, int *y, int direction)
  					yt = *y, xt = *x;
  				else
  					yt = newy, xt = newx;
@@ -113,7 +113,7 @@ index 3c78b0a..6edffb3 100644
  			delim = ISDELIM(gp->u);
  			if (!(gp->mode & ATTR_WDUMMY) && (delim != prevdelim
  					|| (delim && gp->u != prevgp->u)))
-@@ -569,14 +576,14 @@ selsnap(int *x, int *y, int direction)
+@@ -574,14 +581,14 @@ selsnap(int *x, int *y, int direction)
  		*x = (direction < 0) ? 0 : term.col - 1;
  		if (direction < 0) {
  			for (; *y > 0; *y += direction) {
@@ -130,7 +130,7 @@ index 3c78b0a..6edffb3 100644
  						& ATTR_WRAP)) {
  					break;
  				}
-@@ -607,13 +614,13 @@ getsel(void)
+@@ -612,13 +619,13 @@ getsel(void)
  		}
  
  		if (sel.type == SEL_RECTANGULAR) {
@@ -147,7 +147,7 @@ index 3c78b0a..6edffb3 100644
  		while (last >= gp && last->u == ' ')
  			--last;
  
-@@ -848,6 +855,9 @@ void
+@@ -853,6 +860,9 @@ void
  ttywrite(const char *s, size_t n, int may_echo)
  {
  	const char *next;
@@ -157,7 +157,7 @@ index 3c78b0a..6edffb3 100644
  
  	if (may_echo && IS_SET(MODE_ECHO))
  		twrite(s, n, 1);
-@@ -1059,13 +1069,53 @@ tswapscreen(void)
+@@ -1071,13 +1081,61 @@ tswapscreen(void)
  }
  
  void
@@ -174,6 +174,10 @@ index 3c78b0a..6edffb3 100644
 +
 +	if (term.scr > 0) {
 +		term.scr -= n;
++
++		/* process scrolldown */
++		xsixelscrolldown(&term.sixel, n, term.bot);
++
 +		selscroll(0, -n);
 +		tfulldirt();
 +	}
@@ -189,6 +193,10 @@ index 3c78b0a..6edffb3 100644
 +
 +	if (term.scr <= HISTSIZE-n) {
 +		term.scr += n;
++
++		/* process scrollup */
++		xsixelscrollup(&term.sixel, n, term.top);
++
 +		selscroll(0, n);
 +		tfulldirt();
 +	}
@@ -212,9 +220,9 @@ index 3c78b0a..6edffb3 100644
  	tsetdirt(orig, term.bot-n);
  	tclearregion(0, term.bot-n+1, term.col-1, term.bot);
  
-@@ -1075,17 +1125,28 @@ tscrolldown(int orig, int n)
- 		term.line[i-n] = temp;
- 	}
+@@ -1089,11 +1147,12 @@ tscrolldown(int orig, int n)
+ 	/* process scrolldown */
+ 	xsixelscrolldown(&term.sixel, n, term.bot);
  
 -	selscroll(orig, n);
 +	if (term.scr == 0)
@@ -227,6 +235,7 @@ index 3c78b0a..6edffb3 100644
  {
  	int i;
  	Line temp;
+@@ -1101,6 +1160,16 @@ tscrollup(int orig, int n)
  
  	LIMIT(n, 0, term.bot-orig+1);
  
@@ -243,9 +252,9 @@ index 3c78b0a..6edffb3 100644
  	tclearregion(0, orig, term.col-1, orig+n-1);
  	tsetdirt(orig+n, term.bot);
  
-@@ -1095,7 +1156,8 @@ tscrollup(int orig, int n)
- 		term.line[i+n] = temp;
- 	}
+@@ -1113,7 +1182,8 @@ tscrollup(int orig, int n)
+ 	/* process scrollup */
+ 	xsixelscrollup(&term.sixel, n, term.top);
  
 -	selscroll(orig, -n);
 +	if (term.scr == 0)
@@ -253,7 +262,7 @@ index 3c78b0a..6edffb3 100644
  }
  
  void
-@@ -1124,7 +1186,7 @@ tnewline(int first_col)
+@@ -1142,7 +1212,7 @@ tnewline(int first_col)
  	int y = term.c.y;
  
  	if (y == term.bot) {
@@ -262,7 +271,7 @@ index 3c78b0a..6edffb3 100644
  	} else {
  		y++;
  	}
-@@ -1292,14 +1354,14 @@ void
+@@ -1310,14 +1380,14 @@ void
  tinsertblankline(int n)
  {
  	if (BETWEEN(term.c.y, term.top, term.bot))
@@ -279,7 +288,7 @@ index 3c78b0a..6edffb3 100644
  }
  
  int32_t
-@@ -1736,11 +1798,11 @@ csihandle(void)
+@@ -1771,11 +1841,11 @@ csihandle(void)
  		break;
  	case 'S': /* SU -- Scroll <n> line up */
  		DEFAULT(csiescseq.arg[0], 1);
@@ -293,7 +302,7 @@ index 3c78b0a..6edffb3 100644
  		break;
  	case 'L': /* IL -- Insert <n> blank lines */
  		DEFAULT(csiescseq.arg[0], 1);
-@@ -2252,7 +2314,7 @@ eschandle(uchar ascii)
+@@ -2303,7 +2373,7 @@ eschandle(uchar ascii)
  		return 0;
  	case 'D': /* IND -- Linefeed */
  		if (term.c.y == term.bot) {
@@ -302,7 +311,7 @@ index 3c78b0a..6edffb3 100644
  		} else {
  			tmoveto(term.c.x, term.c.y+1);
  		}
-@@ -2265,7 +2327,7 @@ eschandle(uchar ascii)
+@@ -2316,7 +2386,7 @@ eschandle(uchar ascii)
  		break;
  	case 'M': /* RI -- Reverse index */
  		if (term.c.y == term.top) {
@@ -311,7 +320,7 @@ index 3c78b0a..6edffb3 100644
  		} else {
  			tmoveto(term.c.x, term.c.y-1);
  		}
-@@ -2475,7 +2537,7 @@ twrite(const char *buf, int buflen, int show_ctrl)
+@@ -2542,7 +2612,7 @@ twrite(const char *buf, int buflen, int show_ctrl)
  void
  tresize(int col, int row)
  {
@@ -320,7 +329,7 @@ index 3c78b0a..6edffb3 100644
  	int minrow = MIN(row, term.row);
  	int mincol = MIN(col, term.col);
  	int *bp;
-@@ -2512,6 +2574,14 @@ tresize(int col, int row)
+@@ -2579,6 +2649,14 @@ tresize(int col, int row)
  	term.dirty = xrealloc(term.dirty, row * sizeof(*term.dirty));
  	term.tabs = xrealloc(term.tabs, col * sizeof(*term.tabs));
  
@@ -335,7 +344,7 @@ index 3c78b0a..6edffb3 100644
  	/* resize each row to new width, zero-pad if needed */
  	for (i = 0; i < minrow; i++) {
  		term.line[i] = xrealloc(term.line[i], col * sizeof(Glyph));
-@@ -2570,7 +2640,7 @@ drawregion(int x1, int y1, int x2, int y2)
+@@ -2637,7 +2715,7 @@ drawregion(int x1, int y1, int x2, int y2)
  			continue;
  
  		term.dirty[y] = 0;
@@ -344,23 +353,28 @@ index 3c78b0a..6edffb3 100644
  	}
  }
  
-@@ -2591,8 +2661,9 @@ draw(void)
+@@ -2658,10 +2736,12 @@ draw(void)
  		cx--;
  
  	drawregion(0, 0, term.col, term.row);
+-  xdrawsixel(&term.sixel, term.line, term.row, term.col);
 -	xdrawcursor(cx, term.c.y, term.line[term.c.y][cx],
--			term.ocx, term.ocy, term.line[term.ocy][term.ocx]);
-+	if (term.scr == 0)
-+		xdrawcursor(cx, term.c.y, term.line[term.c.y][cx],
-+				term.ocx, term.ocy, term.line[term.ocy][term.ocx]);
+-			term.ocx, term.ocy, term.line[term.ocy][term.ocx],
+-			term.line[term.ocy], term.col);
++  if (term.scr == 0) {
++    xdrawsixel(&term.sixel, term.line, term.row, term.col);
++    xdrawcursor(cx, term.c.y, term.line[term.c.y][cx],
++        term.ocx, term.ocy, term.line[term.ocy][term.ocx],
++        term.line[term.ocy], term.col);
++  }
  	term.ocx = cx;
  	term.ocy = term.c.y;
  	xfinishdraw();
 diff --git a/st.h b/st.h
-index bca2cb5..1ecf257 100644
+index 58b4585..e10b146 100644
 --- a/st.h
 +++ b/st.h
-@@ -82,6 +82,8 @@ void die(const char *, ...);
+@@ -102,6 +102,8 @@ void die(const char *, ...);
  void redraw(void);
  void draw(void);
  

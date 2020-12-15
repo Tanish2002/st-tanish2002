@@ -1,25 +1,30 @@
-From ecda0a8d384480c1e6f291eea1be61877fc4f7d9 Mon Sep 17 00:00:00 2001
+From 64d4164745befb72c916357796e4c127ff9e5d30 Mon Sep 17 00:00:00 2001
 From: Tanish2002 <tanishkhare@gmail.com>
-Date: Sun, 13 Dec 2020 16:32:46 +0530
-Subject: [PATCH 1/3] add anysize
+Date: Tue, 15 Dec 2020 15:11:34 +0530
+Subject: [PATCH 10/11] st-anysize
 
 ---
- x.c | 52 ++++++++++++++++++++++++++++------------------------
- 1 file changed, 28 insertions(+), 24 deletions(-)
+ win.h |  1 +
+ x.c   | 51 +++++++++++++++++++++++++++------------------------
+ 2 files changed, 28 insertions(+), 24 deletions(-)
 
-diff --git a/x.c b/x.c
-index 423987d..dd9e628 100644
---- a/x.c
-+++ b/x.c
-@@ -96,6 +96,7 @@ typedef XftGlyphFontSpec GlyphFontSpec;
+diff --git a/win.h b/win.h
+index 827026c..1a83682 100644
+--- a/win.h
++++ b/win.h
+@@ -26,6 +26,7 @@ enum win_mode {
  typedef struct {
  	int tw, th; /* tty width and height */
  	int w, h; /* window width and height */
 +	int hborderpx, vborderpx;
  	int ch; /* char height */
  	int cw; /* char width  */
- 	int cyo; /* char y offset */
-@@ -354,7 +355,7 @@ ttysend(const Arg *arg)
+   int cyo; /* char y offset */
+diff --git a/x.c b/x.c
+index 021099d..619961e 100644
+--- a/x.c
++++ b/x.c
+@@ -348,7 +348,7 @@ ttysend(const Arg *arg)
  int
  evcol(XEvent *e)
  {
@@ -28,7 +33,7 @@ index 423987d..dd9e628 100644
  	LIMIT(x, 0, win.tw - 1);
  	return x / win.cw;
  }
-@@ -362,7 +363,7 @@ evcol(XEvent *e)
+@@ -356,7 +356,7 @@ evcol(XEvent *e)
  int
  evrow(XEvent *e)
  {
@@ -37,7 +42,7 @@ index 423987d..dd9e628 100644
  	LIMIT(y, 0, win.th - 1);
  	return y / win.ch;
  }
-@@ -744,6 +745,9 @@ cresize(int width, int height)
+@@ -738,6 +738,9 @@ cresize(int width, int height)
  	col = MAX(1, col);
  	row = MAX(1, row);
  
@@ -47,7 +52,7 @@ index 423987d..dd9e628 100644
  	tresize(col, row);
  	xresize(col, row);
  	ttyresize(win.tw, win.th);
-@@ -1263,8 +1267,8 @@ xinit(int cols, int rows)
+@@ -1238,8 +1241,8 @@ xinit(int cols, int rows)
  	xloadcols();
  
  	/* adjust fixed window geometry */
@@ -58,7 +63,7 @@ index 423987d..dd9e628 100644
  	if (xw.gm & XNegative)
  		xw.l += DisplayWidth(xw.dpy, xw.scr) - win.w - 2;
  	if (xw.gm & YNegative)
-@@ -1351,7 +1355,7 @@ xinit(int cols, int rows)
+@@ -1330,7 +1333,7 @@ xinit(int cols, int rows)
  int
  xmakeglyphfontspecs(XftGlyphFontSpec *specs, const Glyph *glyphs, int len, int x, int y)
  {
@@ -67,7 +72,7 @@ index 423987d..dd9e628 100644
  	ushort mode, prevmode = USHRT_MAX;
  	Font *font = &dc.font;
  	int frcflags = FRC_NORMAL;
-@@ -1492,7 +1496,7 @@ void
+@@ -1471,7 +1474,7 @@ void
  xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len, int x, int y)
  {
  	int charlen = len * ((base.mode & ATTR_WIDE) ? 2 : 1);
@@ -76,7 +81,7 @@ index 423987d..dd9e628 100644
  	    width = charlen * win.cw;
  	Color *fg, *bg, *temp, revfg, revbg, truefg, truebg;
  	XRenderColor colfg, colbg;
-@@ -1582,17 +1586,17 @@ xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len, int x, i
+@@ -1561,17 +1564,17 @@ xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len, int x, i
  
  	/* Intelligent cleaning up of the borders. */
  	if (x == 0) {
@@ -100,7 +105,7 @@ index 423987d..dd9e628 100644
  		xclear(winx, winy + win.ch, winx + width, win.h);
  
  	/* Clean up the region we want to draw to. */
-@@ -1693,35 +1697,35 @@ xdrawcursor(int cx, int cy, Glyph g, int ox, int oy, Glyph og, Line line, int le
+@@ -1672,35 +1675,35 @@ xdrawcursor(int cx, int cy, Glyph g, int ox, int oy, Glyph og, Line line, int le
  		case 3: /* Blinking Underline */
  		case 4: /* Steady Underline */
  			XftDrawRect(xw.draw, &drawcol,

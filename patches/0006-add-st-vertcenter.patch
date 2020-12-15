@@ -1,25 +1,30 @@
-From c97179271a875613b02633870bb892440ebcf2a5 Mon Sep 17 00:00:00 2001
+From ce5f0299117c4525db55961b561e6a4eafb81b8f Mon Sep 17 00:00:00 2001
 From: Tanish2002 <tanishkhare@gmail.com>
-Date: Sun, 13 Dec 2020 01:18:53 +0530
-Subject: [PATCH 5/9] add st-vertcenter
+Date: Tue, 15 Dec 2020 15:08:29 +0530
+Subject: [PATCH 06/11] add st-vertcenter
 
 ---
- x.c | 10 ++++++----
- 1 file changed, 6 insertions(+), 4 deletions(-)
+ win.h | 1 +
+ x.c   | 9 +++++----
+ 2 files changed, 6 insertions(+), 4 deletions(-)
 
-diff --git a/x.c b/x.c
-index d49b72b..6f80e6d 100644
---- a/x.c
-+++ b/x.c
-@@ -83,6 +83,7 @@ typedef struct {
+diff --git a/win.h b/win.h
+index 9ee6a7e..827026c 100644
+--- a/win.h
++++ b/win.h
+@@ -28,6 +28,7 @@ typedef struct {
  	int w, h; /* window width and height */
  	int ch; /* char height */
  	int cw; /* char width  */
-+	int cyo; /* char y offset */
++  int cyo; /* char y offset */
  	int mode; /* window state/mode flags */
  	int cursor; /* cursor style */
  } TermWindow;
-@@ -1012,6 +1013,7 @@ xloadfonts(char *fontstr, double fontsize)
+diff --git a/x.c b/x.c
+index 8b904a0..c08e3ed 100644
+--- a/x.c
++++ b/x.c
+@@ -1001,6 +1001,7 @@ xloadfonts(char *fontstr, double fontsize)
  	/* Setting character width and height. */
  	win.cw = ceilf(dc.font.width * cwscale);
  	win.ch = ceilf(dc.font.height * chscale);
@@ -27,7 +32,7 @@ index d49b72b..6f80e6d 100644
  
  	FcPatternDel(pattern, FC_SLANT);
  	FcPatternAddInteger(pattern, FC_SLANT, FC_SLANT_ITALIC);
-@@ -1344,7 +1346,7 @@ xmakeglyphfontspecs(XftGlyphFontSpec *specs, const Glyph *glyphs, int len, int x
+@@ -1328,7 +1329,7 @@ xmakeglyphfontspecs(XftGlyphFontSpec *specs, const Glyph *glyphs, int len, int x
  	FcCharSet *fccharset;
  	int i, f, numspecs = 0;
  
@@ -36,7 +41,7 @@ index d49b72b..6f80e6d 100644
  		/* Fetch rune and mode for current glyph. */
  		rune = glyphs[i].u;
  		mode = glyphs[i].mode;
-@@ -1369,7 +1371,7 @@ xmakeglyphfontspecs(XftGlyphFontSpec *specs, const Glyph *glyphs, int len, int x
+@@ -1353,7 +1354,7 @@ xmakeglyphfontspecs(XftGlyphFontSpec *specs, const Glyph *glyphs, int len, int x
  				font = &dc.bfont;
  				frcflags = FRC_BOLD;
  			}
@@ -45,7 +50,7 @@ index d49b72b..6f80e6d 100644
  		}
  
  		if (mode & ATTR_BOXDRAW) {
-@@ -1591,12 +1593,12 @@ xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len, int x, i
+@@ -1578,12 +1579,12 @@ xdrawglyphfontspecs(const XftGlyphFontSpec *specs, Glyph base, int len, int x, i
  
  	/* Render underline and strikethrough. */
  	if (base.mode & ATTR_UNDERLINE) {

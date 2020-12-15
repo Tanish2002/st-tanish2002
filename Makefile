@@ -4,7 +4,7 @@
 
 include config.mk
 
-SRC = st.c x.c boxdraw.c hb.c
+SRC = st.c x.c sixel.c sixel_hls.c boxdraw.c hb.c
 OBJ = $(SRC:.c=.o)
 
 all: options st
@@ -23,8 +23,8 @@ config.h:
 
 st.o: config.h st.h win.h
 x.o: arg.h config.h st.h win.h hb.h
-boxdraw.o: config.h st.h boxdraw_data.h
 hb.o: st.h
+boxdraw.o: config.h st.h boxdraw_data.h
 
 $(OBJ): config.h config.mk
 

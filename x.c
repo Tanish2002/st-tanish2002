@@ -18,6 +18,7 @@
 
 char *argv0;
 #include "arg.h"
+#include "sixel.h"
 #include "st.h"
 #include "win.h"
 #include "hb.h"
@@ -92,18 +93,6 @@ typedef XftDraw *Draw;
 typedef XftColor Color;
 typedef XftGlyphFontSpec GlyphFontSpec;
 
-/* Purely graphic info */
-typedef struct {
-	int tw, th; /* tty width and height */
-	int w, h; /* window width and height */
-	int hborderpx, vborderpx;
-	int ch; /* char height */
-	int cw; /* char width  */
-	int cyo; /* char y offset */
-	int mode; /* window state/mode flags */
-	int cursor; /* cursor style */
-} TermWindow;
-
 typedef struct {
 	Display *dpy;
 	Colormap cmap;
@@ -122,7 +111,6 @@ typedef struct {
 	XSetWindowAttributes attrs;
 	int scr;
 	int isfixed; /* is fixed geometry? */
-	int depth; /* bit depth */
 	int l, t; /* left and top offset */
 	int gm; /* geometry mask */
 } XWindow;
@@ -265,7 +253,6 @@ static char *usedfont = NULL;
 static double usedfontsize = 0;
 static double defaultfontsize = 0;
 
-static char *opt_alpha = NULL;
 static char *opt_class = NULL;
 static char **opt_cmd  = NULL;
 static char *opt_embed = NULL;
@@ -276,6 +263,12 @@ static char *opt_name  = NULL;
 static char *opt_title = NULL;
 
 static int oldbutton = 3; /* button event on startup: 3 = release */
+
+TermWindow
+gettermwindow()
+{
+	return win;
+}
 
 void
 clipcopy(const Arg *dummy)
@@ -761,7 +754,7 @@ xresize(int col, int row)
 
 	XFreePixmap(xw.dpy, xw.buf);
 	xw.buf = XCreatePixmap(xw.dpy, xw.win, win.w, win.h,
-			xw.depth);
+			DefaultDepth(xw.dpy, xw.scr));
 	XftDrawChange(xw.draw, xw.buf);
 	xclear(0, 0, win.w, win.h);
 
@@ -821,13 +814,6 @@ xloadcols(void)
 			else
 				die("could not allocate color %d\n", i);
 		}
-
-	/* set alpha value of bg color */
-	if (opt_alpha)
-		alpha = strtof(opt_alpha, NULL);
-	dc.col[defaultbg].color.alpha = (unsigned short)(0xffff * alpha);
-	dc.col[defaultbg].pixel &= 0x00FFFFFF;
-	dc.col[defaultbg].pixel |= (unsigned char)(0xff * alpha) << 24;
 	loaded = 1;
 }
 
@@ -1236,21 +1222,9 @@ xinit(int cols, int rows)
 	Window parent;
 	pid_t thispid = getpid();
 	XColor xmousefg, xmousebg;
-	XWindowAttributes attr;
-	XVisualInfo vis;
 
 	xw.scr = XDefaultScreen(xw.dpy);
-
-	if (!(opt_embed && (parent = strtol(opt_embed, NULL, 0)))) {
-		parent = XRootWindow(xw.dpy, xw.scr);
-		xw.depth = 32;
-	} else {
-		XGetWindowAttributes(xw.dpy, parent, &attr);
-		xw.depth = attr.depth;
-	}
-
-	XMatchVisualInfo(xw.dpy, xw.scr, xw.depth, TrueColor, &vis);
-	xw.vis = vis.visual;
+	xw.vis = XDefaultVisual(xw.dpy, xw.scr);
 
 	/* font */
 	if (!FcInit())
@@ -1263,7 +1237,7 @@ xinit(int cols, int rows)
 	xloadsparefonts();
 
 	/* colors */
-	xw.cmap = XCreateColormap(xw.dpy, parent, xw.vis, None);
+	xw.cmap = XDefaultColormap(xw.dpy, xw.scr);
 	xloadcols();
 
 	/* adjust fixed window geometry */
@@ -1283,15 +1257,19 @@ xinit(int cols, int rows)
 		| ButtonMotionMask | ButtonPressMask | ButtonReleaseMask;
 	xw.attrs.colormap = xw.cmap;
 
+	if (!(opt_embed && (parent = strtol(opt_embed, NULL, 0))))
+		parent = XRootWindow(xw.dpy, xw.scr);
 	xw.win = XCreateWindow(xw.dpy, parent, xw.l, xw.t,
-			win.w, win.h, 0, xw.depth, InputOutput,
+			win.w, win.h, 0, XDefaultDepth(xw.dpy, xw.scr), InputOutput,
 			xw.vis, CWBackPixel | CWBorderPixel | CWBitGravity
 			| CWEventMask | CWColormap, &xw.attrs);
 
 	memset(&gcvalues, 0, sizeof(gcvalues));
 	gcvalues.graphics_exposures = False;
-	xw.buf = XCreatePixmap(xw.dpy, xw.win, win.w, win.h, xw.depth);
-	dc.gc = XCreateGC(xw.dpy, xw.buf, GCGraphicsExposures, &gcvalues);
+	dc.gc = XCreateGC(xw.dpy, parent, GCGraphicsExposures,
+			&gcvalues);
+	xw.buf = XCreatePixmap(xw.dpy, xw.win, win.w, win.h,
+			DefaultDepth(xw.dpy, xw.scr));
 	XSetForeground(xw.dpy, dc.gc, dc.col[defaultbg].pixel);
 	XFillRectangle(xw.dpy, xw.buf, dc.gc, 0, 0, win.w, win.h);
 
@@ -1766,6 +1744,87 @@ xsettitle(char *p)
 }
 
 int
+xsixelinit(SixelContext *ctx)
+{
+	return sixel_parser_init(&ctx->state, 0, dc.col[defaultbg].pixel, 1, win.cw, win.ch);
+}
+
+int
+xsixelparse(SixelContext *ctx, unsigned char *u, int len)
+{
+	return sixel_parser_parse(&ctx->state, u, len);
+}
+
+void
+xsixelnewimage(SixelContext *ctx, int tx, int ty)
+{
+	ImageList *new_image;
+	int i;
+
+	new_image = malloc(sizeof(ImageList));
+	memset(new_image, 0, sizeof(ImageList));
+	new_image->x = tx;
+	new_image->y = ty;
+	new_image->width = ctx->state.image.width;
+	new_image->height = ctx->state.image.height;
+	new_image->pixels = malloc(new_image->width * new_image->height * 4);
+	if (sixel_parser_finalize(&ctx->state, new_image->pixels) != 0) {
+		perror("sixel_parser_finalize() failed");
+		sixel_parser_deinit(&ctx->state);
+		return;
+	}
+	sixel_parser_deinit(&ctx->state);
+	if (ctx->images) {
+		ImageList *im;
+		for (im = ctx->images; im->next;)
+			im = im->next;
+		im->next = new_image;
+		new_image->prev = im;
+	} else {
+		ctx->images = new_image;
+	}
+}
+
+void
+xsixeldeleteimage(SixelContext *ctx, ImageList *im)
+{
+	if (im->prev)
+		im->prev->next = im->next;
+	else
+		ctx->images = im->next;
+	if (im->next)
+		im->next->prev = im->prev;
+	if (im->pixmap)
+		XFreePixmap(xw.dpy, (Drawable)im->pixmap);
+	free(im->pixels);
+	free(im);
+}
+
+void
+xsixelscrolldown(SixelContext *ctx, int n, int bottom)
+{
+	ImageList *im;
+	for (im = ctx->images; im; im = im->next) {
+		if (im->y < bottom)
+			im->y += n;
+		if (im->y > bottom)
+			im->should_delete = 1;
+	}
+}
+
+void
+xsixelscrollup(SixelContext *ctx, int n, int top)
+{
+	ImageList *im;
+	for (im = ctx->images; im; im = im->next) {
+		if (im->y+im->height/win.ch > top)
+			im->y -= n;
+		if (im->y+im->height/win.ch < top)
+			im->should_delete = 1;
+	}
+}
+
+int
 xstartdraw(void)
 {
 	if (IS_SET(MODE_VISIBLE))
@@ -1802,6 +1861,88 @@ xdrawline(Line line, int x1, int y1, int x2)
 	}
 	if (i > 0)
 		xdrawglyphfontspecs(specs, base, i, ox, y1);
+}
+
+void
+xdrawsixel(SixelContext *ctx, Line *line, int row, int col)
+{
+	ImageList *im, *tmp;
+	int x, y;
+	int n = 0;
+	int nlimit = 256;
+	XRectangle *rects = NULL;
+	XGCValues gcvalues = { 0 };
+	GC gc;
+
+	for (im = ctx->images; im;) {
+		if (im->should_delete) {
+			tmp = im;
+			im = im->next;
+			xsixeldeleteimage(ctx, tmp);
+			continue;
+		}
+
+		if (!im->pixmap) {
+			im->pixmap = (void *)XCreatePixmap(xw.dpy, xw.win, im->width, im->height, DefaultDepth(xw.dpy, xw.scr));
+			XImage ximage = {
+				.format = ZPixmap,
+				.data = (char *)im->pixels,
+				.width = im->width,
+				.height = im->height,
+				.xoffset = 0,
+				.byte_order = LSBFirst,
+				.bitmap_bit_order = MSBFirst,
+				.bits_per_pixel = 32,
+				.bytes_per_line = im->width * 4,
+				.bitmap_unit = 32,
+				.bitmap_pad = 32,
+				.depth = 24
+			};
+			XPutImage(xw.dpy, (Drawable)im->pixmap, dc.gc, &ximage, 0, 0, 0, 0, im->width, im->height);
+			free(im->pixels);
+			im->pixels = NULL;
+		}
+		n = 0;
+		for (y = im->y; y < (im->y + (im->height + win.ch - 1) / win.ch) && y < row; y++) {
+			if (y >= 0) {
+				for (x = im->x; x < (im->x + (im->width + win.cw - 1) / win.cw) && x < col; x++) {
+					if (!rects)
+						rects = xmalloc(sizeof(XRectangle) * nlimit);
+					if (line[y][x].mode & ATTR_SIXEL) {
+						if (n > 0 && rects[n-1].x+rects[n-1].width == borderpx+x*win.cw && rects[n-1].y == borderpx+y*win.ch) {
+							rects[n-1].width += win.cw;
+						} else {
+							rects[n].x = borderpx+x*win.cw;
+							rects[n].y = borderpx+y*win.ch;
+							rects[n].width = win.cw;
+							rects[n].height = win.ch;
+							if (++n == nlimit && (rects = realloc(rects, sizeof(XRectangle) * (nlimit *= 2))) == NULL)
+								die("Out of memory\n");
+						}
+					}
+				}
+			}
+			if (n > 1 && rects[n-2].x == rects[n-1].x && rects[n-2].width == rects[n-1].width) {
+				if (rects[n-2].y+rects[n-2].height == rects[n-1].y) {
+					rects[n-2].height += win.ch;
+					n--;
+				}
+			}
+		}
+		if (n == 0) {
+			tmp = im;
+			im = im->next;
+			xsixeldeleteimage(ctx, tmp);
+			continue;
+		}
+		gc = XCreateGC(xw.dpy, xw.win, 0, &gcvalues);
+		if (n > 1)
+			XSetClipRectangles(xw.dpy, gc, 0, 0, rects, n, YXSorted);
+		XCopyArea(xw.dpy, (Drawable)im->pixmap, xw.buf, gc, 0, 0, im->width, im->height, borderpx + im->x * win.cw, borderpx + im->y * win.ch);
+		XFreeGC(xw.dpy, gc);
+		im = im->next;
+	}
+	free(rects);
 }
 
 void
@@ -2242,9 +2383,6 @@ main(int argc, char *argv[])
 	ARGBEGIN {
 	case 'a':
 		allowaltscreen = 0;
-		break;
-	case 'A':
-		opt_alpha = EARGF(usage());
 		break;
 	case 'c':
 		opt_class = EARGF(usage());

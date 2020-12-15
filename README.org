@@ -7,8 +7,8 @@
 + For Live Reload support you have to kill st SIGUSR1 Signal i.e
   =$ pkill -USR1 st=
 + For emoji support use this [[https://gitlab.freedesktop.org/xorg/lib/libxft/merge_requests/1.patch][patch]] on LibXft and recompile it Credit: Maxime Coste
-** Changes   
-+ *added alpha patch* for kewl transparency  ,
+** Changes      
++ *added sixel patch* to have sixel graphics in terminal,
 + *added font2 patch* to have emoji fallback fonts,
 + *added live-reload patch* to reload colors and font on the fly,
 + *added boxdraw patch* to make lines gapless  

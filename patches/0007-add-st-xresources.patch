@@ -1,7 +1,7 @@
 From 37ddf45484a5d61dc751da3132bd9949f4f1ef1b Mon Sep 17 00:00:00 2001
 From: Tanish2002 <tanishkhare@gmail.com>
 Date: Tue, 15 Dec 2020 15:08:48 +0530
-Subject: [PATCH 07/11] add st-xresources
+Subject: [PATCH 07/12] add st-xresources
 
 ---
  config.def.h | 36 ++++++++++++++++++++++++

@@ -1,7 +1,7 @@
 From 93108babb7b0877c8523920ad02b4cd0dc3026aa Mon Sep 17 00:00:00 2001
 From: Tanish2002 <tanishkhare@gmail.com>
 Date: Tue, 15 Dec 2020 15:09:12 +0530
-Subject: [PATCH 08/11] add stmessage
+Subject: [PATCH 08/12] add stmessage
 
 ---
  x.c | 9 ++++++++-

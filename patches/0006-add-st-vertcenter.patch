@@ -1,7 +1,7 @@
 From ce5f0299117c4525db55961b561e6a4eafb81b8f Mon Sep 17 00:00:00 2001
 From: Tanish2002 <tanishkhare@gmail.com>
 Date: Tue, 15 Dec 2020 15:08:29 +0530
-Subject: [PATCH 06/11] add st-vertcenter
+Subject: [PATCH 06/12] add st-vertcenter
 
 ---
  win.h | 1 +

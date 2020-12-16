@@ -1,7 +1,7 @@
 From 64d4164745befb72c916357796e4c127ff9e5d30 Mon Sep 17 00:00:00 2001
 From: Tanish2002 <tanishkhare@gmail.com>
 Date: Tue, 15 Dec 2020 15:11:34 +0530
-Subject: [PATCH 10/11] st-anysize
+Subject: [PATCH 10/12] st-anysize
 
 ---
  win.h |  1 +

@@ -1,7 +1,7 @@
 From f058c5582e7cb66b66a4c1a5a399e042704d6153 Mon Sep 17 00:00:00 2001
 From: Tanish2002 <tanishkhare@gmail.com>
 Date: Tue, 15 Dec 2020 15:00:48 +0530
-Subject: [PATCH 01/11] add st-sixel
+Subject: [PATCH 01/12] add st-sixel
 
 ---
  Makefile    |   2 +-

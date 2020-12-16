@@ -1,7 +1,7 @@
 From ffdb6a4d6d6ad43aeb75980122e4c4becc35cbdb Mon Sep 17 00:00:00 2001
 From: Tanish2002 <tanishkhare@gmail.com>
 Date: Tue, 15 Dec 2020 15:08:11 +0530
-Subject: [PATCH 05/11] add st-scrollback
+Subject: [PATCH 05/12] add st-scrollback
 
 ---
  config.def.h |   4 ++

@@ -1,7 +1,7 @@
 From 5ab93f0e2b44a5fd7ee58a47cc6e670acbf7bf71 Mon Sep 17 00:00:00 2001
 From: Tanish2002 <tanishkhare@gmail.com>
 Date: Tue, 15 Dec 2020 15:00:58 +0530
-Subject: [PATCH 02/11] add st-boxdraw
+Subject: [PATCH 02/12] add st-boxdraw
 
 ---
  Makefile       |   3 +-

@@ -1,7 +1,7 @@
 From 708ea520fac61d30952e614860165d37628f012b Mon Sep 17 00:00:00 2001
 From: Tanish2002 <tanishkhare@gmail.com>
 Date: Tue, 15 Dec 2020 15:10:18 +0530
-Subject: [PATCH 09/11] SIGUSR1 Reload
+Subject: [PATCH 09/12] SIGUSR1 Reload
 
 ---
  x.c | 23 +++++++++++++++++++++++

@@ -1,7 +1,7 @@
 From be8d445ffc8f5989c558cb26b449b6bda765899e Mon Sep 17 00:00:00 2001
 From: Tanish2002 <tanishkhare@gmail.com>
 Date: Tue, 15 Dec 2020 15:11:48 +0530
-Subject: [PATCH 11/11] st-w3m
+Subject: [PATCH 11/12] st-w3m
 
 ---
  x.c | 2 ++

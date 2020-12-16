@@ -1,7 +1,7 @@
 From 8209e74e1e667d5065a517beae2d70cb944457bf Mon Sep 17 00:00:00 2001
 From: Tanish2002 <tanishkhare@gmail.com>
 Date: Tue, 15 Dec 2020 15:05:16 +0530
-Subject: [PATCH 04/11] add st-font2
+Subject: [PATCH 04/12] add st-font2
 
 ---
  config.def.h |   6 +++

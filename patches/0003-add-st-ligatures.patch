@@ -1,7 +1,7 @@
 From bccbc2c2881b48d751e5f6a538c89912513cce08 Mon Sep 17 00:00:00 2001
 From: Tanish2002 <tanishkhare@gmail.com>
 Date: Tue, 15 Dec 2020 15:04:48 +0530
-Subject: [PATCH 03/11] add st-ligatures
+Subject: [PATCH 03/12] add st-ligatures
 
 ---
  Makefile  |   5 +-

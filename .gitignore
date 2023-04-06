@@ -3,5 +3,4 @@ st
 *.rej
 *.orig
 *.pkg.tar.xz
-flake.lock
 result

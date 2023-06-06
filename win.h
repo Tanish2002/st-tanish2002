@@ -22,49 +22,22 @@ enum win_mode {
 	MODE_MOUSE       = MODE_MOUSEBTN|MODE_MOUSEMOTION|MODE_MOUSEX10\
 	                  |MODE_MOUSEMANY,
 };
-/* Purely graphic info */
-typedef struct {
-	int tw, th; /* tty width and height */
-	int w, h; /* window width and height */
-	int hborderpx, vborderpx;
-	int ch; /* char height */
-	int cw; /* char width  */
-  int cyo; /* char y offset */
-	int mode; /* window state/mode flags */
-	int cursor; /* cursor style */
-} TermWindow;
 
-// /* Purely graphic info */
-// typedef struct {
-// 	int tw, th; /* tty width and height */
-// 	int w, h; /* window width and height */
-// 	int ch; /* char height */
-// 	int cw; /* char width  */
-// 	int cyo; /* char y offset */
-// 	int mode; /* window state/mode flags */
-// 	int cursor; /* cursor style */
-// } TermWindow;
-
-TermWindow gettermwindow(void);
 void xbell(void);
 void xclipcopy(void);
-int xsixelinit(SixelContext *);
-void xsixelscrolldown(SixelContext *, int, int);
-void xsixelscrollup(SixelContext *, int, int);
-void xsixelnewimage(SixelContext *, int, int);
-int xsixelparse(SixelContext *, unsigned char *, int);
-void xsixeldeleteimage(SixelContext *, ImageList *);
 void xdrawcursor(int, int, Glyph, int, int, Glyph, Line, int);
-void xdrawsixel(SixelContext *, Line *, int, int);
 void xdrawline(Line, int, int, int);
 void xfinishdraw(void);
 void xloadcols(void);
 int xsetcolorname(int, const char *);
 void xseticontitle(char *);
-void xsettitle(char *);
+void xfreetitlestack(void);
+void xsettitle(char *, int);
+void xpushtitle(void);
 int xsetcursor(int);
 void xsetmode(int, unsigned int);
 void xsetpointermotion(int);
 void xsetsel(char *);
 int xstartdraw(void);
 void xximspot(int, int);
+void xclearwin(void);

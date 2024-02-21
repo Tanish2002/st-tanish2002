@@ -51,6 +51,7 @@ config_init(Display *dpy)
 		resource_load(db, p->name, p->type, p->dst);
 }
 
+#if XRESOURCES_RELOAD_PATCH
 void
 reload_config(int sig)
 {
@@ -65,7 +66,9 @@ reload_config(int sig)
 	/* nearly like zoomabs() */
 	xunloadfonts();
 	xloadfonts(font, 0); /* font <- config_init() */
+	#if FONT2_PATCH
 	xloadsparefonts();
+	#endif // FONT2_PATCH
 	cresize(0, 0);
 	redraw();
 	xhints();
@@ -76,3 +79,4 @@ reload_config(int sig)
 	/* triggers re-render if we're visible */
 	ttywrite("\033[O", 3, 1);
 }
+#endif // XRESOURCES_RELOAD_PATCH

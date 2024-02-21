@@ -4,7 +4,11 @@ xloadsparefont(FcPattern *pattern, int flags)
 	FcPattern *match;
 	FcResult result;
 
+	#if USE_XFTFONTMATCH_PATCH
+	match = XftFontMatch(xw.dpy, xw.scr, pattern, &result);
+	#else
 	match = FcFontMatch(NULL, pattern, &result);
+	#endif // USE_XFTFONTMATCH_PATCH
 	if (!match) {
 		return 1;
 	}
@@ -72,8 +76,10 @@ xloadsparefonts(void)
 
 		FcPatternAddBool(pattern, FC_SCALABLE, 1);
 
+		#if !USE_XFTFONTMATCH_PATCH
 		FcConfigSubstitute(NULL, pattern, FcMatchPattern);
 		XftDefaultSubstitute(xw.dpy, xw.scr, pattern);
+		#endif // USE_XFTFONTMATCH_PATCH
 
 		if (xloadsparefont(pattern, FRC_NORMAL))
 			die("can't open spare font %s\n", *fp);

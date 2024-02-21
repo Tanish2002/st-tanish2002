@@ -5,6 +5,7 @@
 void kscrolldown(const Arg *);
 void kscrollup(const Arg *);
 
+#if SCROLLBACK_MOUSE_PATCH || SCROLLBACK_MOUSE_ALTSCREEN_PATCH
 typedef struct {
 	 uint b;
 	 uint mask;
@@ -13,3 +14,4 @@ typedef struct {
 } MouseKey;
 
 extern MouseKey mkeys[];
+#endif // SCROLLBACK_MOUSE_PATCH / SCROLLBACK_MOUSE_ALTSCREEN_PATCH

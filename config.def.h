@@ -13,7 +13,7 @@ static char *font2[] = {
 };
 
 
-static int borderpx = 45;
+static int borderpx = 0;
 
 
 /*
@@ -88,10 +88,10 @@ static unsigned int cursorthickness = 1;
  * 0: disable (render all U25XX glyphs normally from the font).
  */
 const int boxdraw = 1;
-const int boxdraw_bold = 0;
+const int boxdraw_bold = 1;
 
 /* braille (U28XX):  1: render as adjacent "pixels",  0: use font */
-const int boxdraw_braille = 0;
+const int boxdraw_braille = 1;
 
 /*
  * bell volume. It must be a value between -100 and 100. Use 0 for disabling
@@ -272,6 +272,7 @@ static Shortcut shortcuts[] = {
 	{ ShiftMask,            XK_Print,       printscreen,     {.i =  0} },
 	{ XK_ANY_MOD,           XK_Print,       printsel,        {.i =  0} },
 	{ TERMMOD,              XK_Prior,       zoom,            {.f = +1} },
+	{ MODKEY,               XK_o,           ttysend,         {.s ="\x01\x6f"}},
 	{ TERMMOD,              XK_Next,        zoom,            {.f = -1} },
 	{ TERMMOD,              XK_Home,        zoomreset,       {.f =  0} },
 	{ MODKEY,               XK_c,           clipcopy,        {.i =  0} },

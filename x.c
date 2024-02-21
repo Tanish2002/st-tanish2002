@@ -1058,12 +1058,10 @@ xloadfonts(const char *fontstr, double fontsize)
 	win.cyo = ceilf(dc.font.height * (chscale - 1) / 2);
 
 	FcPatternDel(pattern, FC_SLANT);
-	FcPatternAddInteger(pattern, FC_SLANT, FC_SLANT_ITALIC);
 	if (xloadfont(&dc.ifont, pattern))
 		die("can't open font %s\n", fontstr);
 
 	FcPatternDel(pattern, FC_WEIGHT);
-	FcPatternAddInteger(pattern, FC_WEIGHT, FC_WEIGHT_BOLD);
 	if (xloadfont(&dc.ibfont, pattern))
 		die("can't open font %s\n", fontstr);
 
@@ -1768,26 +1766,17 @@ xdrawline(Line line, int x1, int y1, int x2)
 void
 xfinishdraw(void)
 {
-	ImageList *im;
+	ImageList *im, *next;
 	XGCValues gcvalues;
 	GC gc;
 
-	for (im = term.images; im; im = im->next) {
-		if (term.images == NULL) {
-			/* last image was deleted, bail out */
-			break;
-		}
+	for (im = term.images; im; im = next) {
+		/* get the next image here, because delete_image() will delete the current image */
+		next = im->next;
 
 		if (im->should_delete) {
 			delete_image(im);
-
-			/* prevent the next iteration from accessing an invalid image pointer */
-			im = term.images;
-			if (im == NULL) {
-				break;
-			} else {
-				continue;
-			}
+			continue;
 		}
 
 		if (!im->pixmap) {
@@ -1814,7 +1803,8 @@ xfinishdraw(void)
 		}
 
 		memset(&gcvalues, 0, sizeof(gcvalues));
-		gc = XCreateGC(xw.dpy, xw.win, 0, &gcvalues);
+		gcvalues.graphics_exposures = False;
+		gc = XCreateGC(xw.dpy, xw.win, GCGraphicsExposures, &gcvalues);
 
 		XCopyArea(xw.dpy, (Drawable)im->pixmap, xw.buf, gc, 0, 0, im->width, im->height, win.hborderpx + im->x * win.cw, win.vborderpx + im->y * win.ch);
 		XFreeGC(xw.dpy, gc);

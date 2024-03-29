@@ -10,7 +10,7 @@
     with import nixpkgs {system = "x86_64-linux";}; let
       st-tanish2002 = pkgs.st.overrideAttrs (o: {
         src = self;
-        buildInputs = o.buildInputs ++ [pkgs.harfbuzz];
+        buildInputs = o.buildInputs ++ [pkgs.harfbuzz pkgs.imlib2];
       });
     in {
       defaultPackage.x86_64-linux = st-tanish2002;

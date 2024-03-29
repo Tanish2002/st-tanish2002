@@ -31,7 +31,10 @@ char *scroll = NULL;
 char *stty_args = "stty raw pass8 nl -echo -iexten -cstopb 38400";
 
 /* identification sequence returned in DA and DECID */
-char *vtiden = "\033[?12;4c";
+char *vtiden = "\033[?62;4c"; /* VT200 family (62) with sixel (4) */
+
+/* sixel rgb byte order: LSBFirst or MSBFirst */
+int const sixelbyteorder = LSBFirst;
 
 /* Kerning / character bounding-box multipliers */
 static float cwscale = 1.0;
@@ -43,6 +46,7 @@ static float chscale = 1.0;
  * More advanced example: L" `'\"()[]{}"
  */
 wchar_t *worddelimiters = L" ";
+
 
 /* selection timeouts (in milliseconds) */
 static unsigned int doubleclicktimeout = 300;
@@ -79,7 +83,8 @@ static unsigned int blinktimeout = 800;
 /*
  * thickness of underline and bar cursors
  */
-static unsigned int cursorthickness = 1;
+static unsigned int cursorthickness = 2;
+
 
 /*
  * 1: render most of the lines/blocks characters without using the font for
@@ -124,34 +129,33 @@ float alpha = 0.8;
 
 /* Terminal colors (16 first used in escape sequence) */
 static const char *colorname[] = {
-    /* 8 normal colors */
-    [0] = "#0f0f12", /* black   */
-    [1] = "#7b3b4a", /* red     */
-    [2] = "#3a655e", /* green   */
-    [3] = "#7c8e32", /* yellow  */
-    [4] = "#494da1", /* blue    */
-    [5] = "#9b4fbf", /* magenta */
-    [6] = "#39d4d4", /* cyan    */
-    [7] = "#d6c2c3", /* white   */
+  /* 8 normal colors */
+  [0] = "#0f0f12", /* black   */
+  [1] = "#7b3b4a", /* red     */
+  [2] = "#3a655e", /* green   */
+  [3] = "#7c8e32", /* yellow  */
+  [4] = "#494da1", /* blue    */
+  [5] = "#9b4fbf", /* magenta */
+  [6] = "#39d4d4", /* cyan    */
+  [7] = "#d6c2c3", /* white   */
 
-    /* 8 bright colors */
-    [8] = "#958788",  /* black   */
-    [9] = "#ff6464",  /* red     */
-    [10] = "#527670", /* green   */
-    [11] = "#8d9d4a", /* yellow  */
-    [12] = "#6063a9", /* blue    */
-    [13] = "#a265bf", /* magenta */
-    [14] = "#5dd4d4", /* cyan    */
-    [15] = "#f8e1e2", /* white   */
+  /* 8 bright colors */
+  [8] = "#958788",  /* black   */
+  [9] = "#ff6464",  /* red     */
+  [10] = "#527670", /* green   */
+  [11] = "#8d9d4a", /* yellow  */
+  [12] = "#6063a9", /* blue    */
+  [13] = "#a265bf", /* magenta */
+  [14] = "#5dd4d4", /* cyan    */
+  [15] = "#f8e1e2", /* white   */
 
 	[255] = 0,
 
 	/* more colors can be added after 255 to use with DefaultXX */
-
-    [256] = "#d6c2c3", /* cursor */
-    [257] = "#555555", /* rev cursor */
-    [258] = "#0f0f12", /* background */
-    [259] = "#d6c2c3", /* foreground */
+  [256] = "#d6c2c3", /* cursor */
+  [257] = "#555555", /* rev cursor */
+  [258] = "#0f0f12", /* background */
+  [259] = "#d6c2c3", /* foreground */
 };
 
 
@@ -163,7 +167,6 @@ unsigned int defaultbg = 258;
 unsigned int defaultfg = 259;
 unsigned int defaultcs = 256;
 unsigned int defaultrcs = 257;
-
 
 /*
  * Default shape of cursor
@@ -244,13 +247,13 @@ static uint forcemousemod = ShiftMask;
  */
 static MouseShortcut mshortcuts[] = {
 	/* mask                 button   function        argument       release  screen */
-    {XK_ANY_MOD,			Button4, kscrollup,		 {.i = 5}},
-    {XK_ANY_MOD, 			Button5, kscrolldown,	 {.i = 5}},
-    {XK_ANY_MOD, 			Button2, selpaste,		 {.i = 0}, 1},
-    {ShiftMask,				Button4, ttysend,		 {.s = "\033[5;2~"}},
-    {XK_ANY_MOD,			Button4, ttysend, 		 {.s = "\031"}},
-    {ShiftMask, 			Button5, ttysend, 		 {.s = "\033[6;2~"}},
-    {XK_ANY_MOD,			Button5, ttysend, 		 {.s = "\005"}},
+	{ XK_ANY_MOD,           Button2, selpaste,       {.i = 0},      1 },
+	{ ShiftMask,            Button4, ttysend,        {.s = "\033[5;2~"} },
+	{ ShiftMask,            Button5, ttysend,        {.s = "\033[6;2~"} },
+	{ XK_NO_MOD,            Button4, kscrollup,      {.i = 5},      0, S_PRI },
+	{ XK_NO_MOD,            Button5, kscrolldown,    {.i = 5},      0, S_PRI },
+	{ XK_ANY_MOD,           Button4, ttysend,        {.s = "\031"}, 0, S_ALT },
+	{ XK_ANY_MOD,           Button5, ttysend,        {.s = "\005"}, 0, S_ALT },
 };
 
 /* Internal keyboard shortcuts. */
@@ -267,21 +270,21 @@ static char *setbgcolorcmd[] = { "/bin/sh", "-c",
 
 static Shortcut shortcuts[] = {
 	/* mask                 keysym          function         argument   screen */
+  { MODKEY,               XK_o,           ttysend,         {.s ="\x01\x6f"}}, /* Tmux session key */
 	{ XK_ANY_MOD,           XK_Break,       sendbreak,       {.i =  0} },
 	{ ControlMask,          XK_Print,       toggleprinter,   {.i =  0} },
 	{ ShiftMask,            XK_Print,       printscreen,     {.i =  0} },
 	{ XK_ANY_MOD,           XK_Print,       printsel,        {.i =  0} },
 	{ TERMMOD,              XK_Prior,       zoom,            {.f = +1} },
-	{ MODKEY,               XK_o,           ttysend,         {.s ="\x01\x6f"}},
 	{ TERMMOD,              XK_Next,        zoom,            {.f = -1} },
 	{ TERMMOD,              XK_Home,        zoomreset,       {.f =  0} },
-	{ MODKEY,               XK_c,           clipcopy,        {.i =  0} },
-	{ MODKEY,               XK_v,           clippaste,       {.i =  0} },
+  { MODKEY,               XK_c,           clipcopy,        {.i =  0} },
+  { MODKEY,               XK_v,           clippaste,       {.i =  0} },
 	{ TERMMOD,              XK_O,           changealpha,     {.f = +0.05} },
 	{ TERMMOD,              XK_P,           changealpha,     {.f = -0.05} },
 	{ ShiftMask,            XK_Page_Up,     kscrollup,       {.i = -1}, S_PRI },
 	{ ShiftMask,            XK_Page_Down,   kscrolldown,     {.i = -1}, S_PRI },
-	{ MODKEY,               XK_y,           selpaste,        {.i =  0} },
+	{ TERMMOD,              XK_Y,           selpaste,        {.i =  0} },
 	{ ShiftMask,            XK_Insert,      selpaste,        {.i =  0} },
 	{ TERMMOD,              XK_Num_Lock,    numlock,         {.i =  0} },
 };
